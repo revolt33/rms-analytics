@@ -1,0 +1,10 @@
+.category {
+				margin-top: 20px;
+				position: relative;
+}
+.activate {
+				margin-top: 20px;
+}
+#plot {
+				min-height: 60vh;
+}

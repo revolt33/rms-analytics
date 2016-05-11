@@ -1,0 +1,8 @@
+#outer-container {
+				margin-top: 5vh;
+}
+#taskbar {
+				min-height: 85vh;
+				height: 100%;
+				border-right: 1px solid #245269;
+}
