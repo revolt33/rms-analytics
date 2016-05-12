@@ -37,11 +37,11 @@ public class Processor {
 					st = con.createStatement();
 					random = Utility.getRandomString(20);
 					st.execute("start transaction;");
-					st.executeUpdate("insert into emp (username, type, name, mobile, email, fp_token, dob, house, colony, city, state, zip, landmark, gender) values ('" + employee.getUsername() + "', '" + employee.getType() + "', '" + employee.getName() + "', " + employee.getMobile() + ", '" + employee.getEmail() + "', '" + random + "', '" + employee.getDob() + "',  '" + employee.getStreet()+ "', '" + employee.getColony() + "', '" + employee.getCity() + "', '" + employee.getState() + "', " + employee.getZip() + ", '" + employee.getLandmark() + "', '" + employee.getGender() + "')");
+					st.executeUpdate("insert into emp (username, type, name, mobile, email, fp_token, dob, house, colony, city, state, zip, landmark, gender) values ('" + employee.getUsername() + "', '" + employee.getType() + "', '" + employee.getName() + "', " + employee.getMobile() + ", '" + employee.getEmail() + "', '" + random + "', '" + employee.getDob() + "',  '" + employee.getStreet() + "', '" + employee.getColony() + "', '" + employee.getCity() + "', '" + employee.getState() + "', " + employee.getZip() + ", '" + employee.getLandmark() + "', '" + employee.getGender() + "')");
 					ResultSet rs = st.executeQuery("select LAST_INSERT_ID();");
-					if ( rs.next() ) {
+					if (rs.next()) {
 						result.setCode(rs.getInt(1));
-						st.executeUpdate("update emp set photo='img"+result.getCode()+employee.getImageExt()+"' where id="+result.getCode());
+						st.executeUpdate("update emp set photo='img" + result.getCode() + employee.getImageExt() + "' where id=" + result.getCode());
 						st.execute("commit;");
 						result.setStatus(SUCCESS);
 					}
@@ -61,20 +61,16 @@ public class Processor {
 		}
 		return result;
 	}
-	
-	public static boolean checkUsername(String username, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER ) {
-			synchronized(con) {
-				try {
-					con.setCatalog("employee");
-					Statement st = con.createStatement();
-					ResultSet rs = st.executeQuery("select count(*) as num from emp where username='"+username+"';");
-					if ( rs.next() ) {
-						int count = rs.getInt(1);
-						return count == 0;
-					}
-				} catch (SQLException e) {
-					e.printStackTrace();
+
+	public static boolean checkUsername(String username, AuthToken authToken, Connection con) throws SQLException {
+		if (authToken.getType() == MANAGER) {
+			synchronized (con) {
+				con.setCatalog("employee");
+				Statement st = con.createStatement();
+				ResultSet rs = st.executeQuery("select count(*) as num from emp where username='" + username + "';");
+				if (rs.next()) {
+					int count = rs.getInt(1);
+					return count == 0;
 				}
 			}
 		}
@@ -82,7 +78,7 @@ public class Processor {
 	}
 
 	// pass login credentials and get LoginStatus object
-	public static LoginStatus login(String username, String password, boolean remember,Connection con) {
+	public static LoginStatus login(String username, String password, boolean remember, Connection con) {
 		LoginStatus ls = null;
 		AuthToken authToken = new AuthToken();
 		synchronized (con) {
@@ -95,10 +91,10 @@ public class Processor {
 					int id = rs.getInt(2);
 					char type = rs.getString(3).charAt(0);
 					String name = rs.getString(4);
-					if ( rs.getString("active").charAt(0) == 'y' ) {
+					if (rs.getString("active").charAt(0) == 'y') {
 						if (Password.check(password, pass)) {
 							String token = Utility.getRandomString(6);
-							st.executeUpdate("update emp set auth_token='" + token + "', remember='"+(remember?'y':'n')+"' where id=" + id);
+							st.executeUpdate("update emp set auth_token='" + token + "', remember='" + (remember ? 'y' : 'n') + "' where id=" + id);
 							authToken.setId(id);
 							authToken.setAuthToken(token);
 							authToken.setType(type);
@@ -129,19 +125,17 @@ public class Processor {
 				Statement st = con.createStatement();
 				ResultSet rs = st.executeQuery("select auth_token, active, type, remember, name from emp where id=" + authToken.getId());
 				if (rs.next()) {
-					if ( remember ) {
-						if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && rs.getString(3).charAt(0) == authToken.getType() && rs.getString(4).charAt(0) == 'y' ) {
+					if (remember) {
+						if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && rs.getString(3).charAt(0) == authToken.getType() && rs.getString(4).charAt(0) == 'y') {
 							authToken.setName(rs.getString(5));
 							return true;
 						} else {
 							return false;
 						}
+					} else if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && rs.getString(3).charAt(0) == authToken.getType()) {
+						return true;
 					} else {
-						if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && rs.getString(3).charAt(0) == authToken.getType()) {
-							return true;
-						} else {
-							return false;
-						}
+						return false;
 					}
 				} else {
 					return false;
@@ -210,7 +204,7 @@ public class Processor {
 	//	Get employee list
 	public static ArrayList<Employee> getEmployeeList(AuthToken authToken, Connection con) {
 		ArrayList<Employee> list = new ArrayList<>();
-		if ( authToken.getType() == MANAGER ) {
+		if (authToken.getType() == MANAGER) {
 			synchronized (con) {
 				try {
 					con.setCatalog("employee");
@@ -230,44 +224,47 @@ public class Processor {
 				} catch (SQLException ex) {
 					ex.printStackTrace();
 				}
-				
+
 			}
-		} else
+		} else {
 			return null;
+		}
 		return list;
 	}
-	
+
 	//	Activate/Deactivate Employee
-	public static char alterStatusOfEmployee(int id, boolean activate, AuthToken authToken, Connection con ) {
-		if ( authToken.getType() == MANAGER ) {
-			if ( authToken.getId() != id ) {
+	public static char alterStatusOfEmployee(int id, boolean activate, AuthToken authToken, Connection con) {
+		if (authToken.getType() == MANAGER) {
+			if (authToken.getId() != id) {
 				synchronized (con) {
 					try {
 						con.setCatalog("employee");
 						Statement st = con.createStatement();
-						st.executeUpdate("update emp set active='"+(activate?"y":"n")+"' where id="+id);
+						st.executeUpdate("update emp set active='" + (activate ? "y" : "n") + "' where id=" + id);
 					} catch (SQLException ex) {
 						ex.printStackTrace();
 						return EXCEPTION_OCCURED;
 					}
 				}
-			} else 
+			} else {
 				return UNAUTHORIZED_OPERATION;
-		} else
+			}
+		} else {
 			return NOT_MANAGER;
+		}
 		return SUCCESS;
 	}
-	
+
 	//	call this method to view employee detail
 	public static Employee getEmpDetail(int id, AuthToken authToken, Connection con) {
 		Employee emp = null;
-		if ( authToken.getType() == MANAGER ) {
+		if (authToken.getType() == MANAGER) {
 			synchronized (con) {
 				try {
 					con.setCatalog("employee");
 					Statement st = con.createStatement();
-					ResultSet rs = st.executeQuery("select * from emp where id="+id);
-					if ( rs.next() ) {
+					ResultSet rs = st.executeQuery("select * from emp where id=" + id);
+					if (rs.next()) {
 						emp = new Employee();
 						emp.setName(rs.getString("name"));
 						emp.setType(rs.getString("type").charAt(0));

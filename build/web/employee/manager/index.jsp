@@ -49,7 +49,7 @@
 																<div class="list-group">
 																				<c:url var="list_url" value="Action"></c:url>
 																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_emp" target="content">View Employee</a>
-																				<a href="#" class="list-group-item">Stock</a>
+																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_discount" target="content">View Discount</a>
 																				<a href="#" class="list-group-item">Stock</a>
 																				<a href="#" class="list-group-item">Stock</a>
 																				<a href="#" class="list-group-item">Stock</a>

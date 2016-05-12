@@ -18,9 +18,9 @@
 																<div class="form-group">
 																				<label for="name" class="col-sm-4 control-label">Username:</label>
 																				<div class="col-sm-7">
-																								<input type="text" class="form-control" url="${url}" param="check_username" placeholder="Choose a unique username" name="username" required />
+																								<input type="text" class="form-control verify-input" url="${url}" param="verify_username" placeholder="Choose a unique username" name="username" required />
 																				</div>
-																				<div class="col-sm-1"><span id="username-status" data-toggle="tooltip" data-original-title="" data-animation="true"></span></div>
+																				<div class="col-sm-1"><span id="verify-input-status" data-container="body" data-toggle="tooltip" title=""></span></div>
 																</div>
 																<div class="form-group">
 																				<label for="name" class="col-sm-4 control-label">Type:</label>

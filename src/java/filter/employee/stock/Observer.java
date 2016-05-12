@@ -24,7 +24,7 @@ public class Observer implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpSession session = ((HttpServletRequest) request).getSession();
 		AuthToken authToken = (AuthToken) session.getAttribute("auth_token");
-		if (authToken.getType() == business.employee.Processor.STOCK_EMPLOYEE) {
+		if (authToken.getType() == business.employee.Processor.STOCK_EMPLOYEE || authToken.getType() == business.employee.Processor.MANAGER) {
 			chain.doFilter(request, response);
 		} else {
 			HttpServletResponse httpRes = (HttpServletResponse) response;

@@ -34,9 +34,10 @@ public class Action extends HttpServlet {
 					request.setAttribute("categories", list);
 					RequestDispatcher dispatcher = request.getRequestDispatcher("/employee/sales/resource/counterSales.jsp");
 					dispatcher.forward(request, response);
+					break;
 			}
+			connector.closeConnection(token);
 		}
-		connector.closeConnection(token);
 	}
 
 	@Override
