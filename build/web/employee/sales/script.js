@@ -29,7 +29,7 @@ $(document).ready(function () {
 								if ( !exists ) {
 												var element = document.createElement('li');
 												var title = document.createElement('span');
-												title.textContent	=	$(this).parent().parent().find('.panel-heading').text() + " ("+$(unit).text()+")";
+												title.textContent	=	$(this).parent().parent().find('.panel-heading').text() + " ("+unit[0].firstChild.nodeValue+")";
 												$(element).html(title);
 												var menu = document.createElement('div');
 												var icon = document.createElement('span');

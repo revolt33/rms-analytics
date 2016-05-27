@@ -6,6 +6,7 @@ import application.Utility;
 import business.employee.AuthToken;
 import business.employee.Employee;
 import business.employee.Processor;
+import business.sales.Discount;
 import business.stock.Result;
 import java.io.File;
 import java.io.IOException;
@@ -153,6 +154,23 @@ public class Action extends HttpServlet {
 								} catch (SQLException ex) {
 									writeErrorResponse(json, response, "Internal server error!");
 								}
+								break;
+							case "add_discount":
+								System.out.println("exec");
+								Discount discount = new Discount();
+								discount.setCode(request.getParameter("code"));
+								discount.setType(request.getParameter("type").charAt(0));
+								discount.setPercentage(Float.parseFloat(request.getParameter("percentage")));
+								discount.setMax(Float.parseFloat(request.getParameter("max")));
+								discount.setFrom(Utility.parseInputDateTime(request.getParameter("valid_from")));
+								discount.setTo(Utility.parseInputDateTime(request.getParameter("valid_upto")));
+								discount.setApplicable(request.getParameter("applicable").charAt(0));
+								if ( discount.getApplicable() == 'i' ) {
+									for ( String item: request.getParameterValues("item_list[]") ) {
+										System.out.println(item);
+									}
+								}
+								writeResponse(Processor.SUCCESS, json, response, "Discount added successfully!");
 								break;
 						}
 						connector.closeConnection(token);

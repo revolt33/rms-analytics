@@ -62,6 +62,9 @@
 																				<div id="dialog" class="reloadable"></div>
 																				<div id="load-screen"></div>
 																</div>
+																<div id="content-top-overlay">
+																				<div id="content-top-dialog" class="reloadable"></div>
+																</div>
 												</div>
 								</div>
 				</body>

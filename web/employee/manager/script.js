@@ -18,7 +18,8 @@ $(document).ready(function (){
 																				$('#verify-input-status').attr('title', json['message']);
 																}
 												});
-								}
+								} else
+												$('#verify-input-status').removeAttr('class');
 				});
 });
 

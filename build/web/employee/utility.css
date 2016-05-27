@@ -48,19 +48,30 @@
 				background-color: rgba(255,255,255,0.8);
 				cursor: not-allowed;
 }
-#top-overlay {
-				position: fixed;
+#top-overlay, #content-top-overlay {
 				display: none;
 				background-color: rgba(0, 0, 0, 0.5);
 				z-index: 3;
 				width: 100%;
-				height: 100%;
 				top: 0;
 				left: 0;
 				cursor: not-allowed;
 }
+#top-overlay {
+				position: fixed;
+				height: 100%;
+}
+#content-top-overlay {
+				position: absolute;
+}
 #top-dialog {
 				margin-top: 40vh;
+				cursor: default;
+}
+#content-top-dialog {
+				width: 100%;
+				margin-top: 4vh;
+				margin-bottom: 10vh;
 				cursor: default;
 }
 .disable div {
