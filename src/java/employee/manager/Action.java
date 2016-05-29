@@ -36,27 +36,34 @@ public class Action extends HttpServlet {
 		String param = request.getParameter("param");
 		Connector connector = (Connector) getServletContext().getAttribute("connector");
 		ConnectionToken token = connector.getToken();
-		switch (param) {
-			case "view_emp":
-				ArrayList<Employee> empList = Processor.getEmployeeList(((AuthToken) request.getSession().getAttribute("auth_token")), connector.getConnection(token));
-				connector.closeConnection(token);
-				request.setAttribute("emp_list", empList);
-				RequestDispatcher dispatcher = request.getRequestDispatcher("/employee/manager/resource/view-employee.jsp");
-				dispatcher.forward(request, response);
-				break;
-			case "view_emp_detail":
-				Employee emp = Processor.getEmpDetail(Integer.parseInt(request.getParameter("emp_id")), ((AuthToken) request.getSession().getAttribute("auth_token")), connector.getConnection(token));
-				connector.closeConnection(token);
-				request.setAttribute("emp", emp);
-				dispatcher = request.getRequestDispatcher("/employee/manager/resource/view-employee-detail.jsp");
-				dispatcher.forward(request, response);
-				break;
-			case "view_discount":
-				dispatcher = request.getRequestDispatcher("/employee/manager/resource/view-discounts.jsp");
-				dispatcher.forward(request, response);
-				break;
+		AuthToken authToken = (AuthToken) request.getSession().getAttribute("auth_token");
+		Connection con = connector.getConnection(token);
+		if ( authToken != null ) {
+			if ( con != null ) {
+				switch (param) {
+					case "view_emp":
+						ArrayList<Employee> empList = Processor.getEmployeeList(authToken, con);
+						connector.closeConnection(token);
+						request.setAttribute("emp_list", empList);
+						RequestDispatcher dispatcher = request.getRequestDispatcher("/employee/manager/resource/view-employee.jsp");
+						dispatcher.forward(request, response);
+						break;
+					case "view_emp_detail":
+						Employee emp = Processor.getEmpDetail(Integer.parseInt(request.getParameter("emp_id")), authToken, con);
+						connector.closeConnection(token);
+						request.setAttribute("emp", emp);
+						dispatcher = request.getRequestDispatcher("/employee/manager/resource/view-employee-detail.jsp");
+						dispatcher.forward(request, response);
+						break;
+					case "view_discount":
+						ArrayList<Discount> discounts = business.sales.Processor.getDiscountList(authToken, con);
+						request.setAttribute("discounts", discounts);
+						dispatcher = request.getRequestDispatcher("/employee/manager/resource/view-discounts.jsp");
+						dispatcher.forward(request, response);
+						break;
+				}
+			}
 		}
-
 	}
 
 	@Override
@@ -148,29 +155,54 @@ public class Action extends HttpServlet {
 
 								break;
 							case "verify_discount_code":
+								String code = request.getParameter("input");
+								if ( code.length() < 3 ){
+									writeErrorResponse(json, response, "Code cannot be less than 3 characters!");
+									break;
+								}
+								if ( code.length() > 7 ) {
+									writeErrorResponse(json, response, "Code cannot be more than 7 characters!");
+									break;
+								}
 								try {
-									available = business.sales.Processor.isUniqueDiscountCode(request.getParameter("input"), authToken, con);
+									available = business.sales.Processor.isUniqueDiscountCode(code, authToken, con);
 									writeAvailabilityResponse(available, json, response, "Discount code is available!", "Discount code is not available!");
 								} catch (SQLException ex) {
 									writeErrorResponse(json, response, "Internal server error!");
 								}
 								break;
 							case "add_discount":
-								System.out.println("exec");
 								Discount discount = new Discount();
 								discount.setCode(request.getParameter("code"));
+								if ( discount.getCode().length() < 3 ){
+									writeErrorResponse(json, response, "Code cannot be less than 3 characters!");
+									break;
+								}
+								if ( discount.getCode().length() > 7 ) {
+									writeErrorResponse(json, response, "Code cannot be more than 7 characters!");
+									break;
+								}
 								discount.setType(request.getParameter("type").charAt(0));
 								discount.setPercentage(Float.parseFloat(request.getParameter("percentage")));
 								discount.setMax(Float.parseFloat(request.getParameter("max")));
 								discount.setFrom(Utility.parseInputDateTime(request.getParameter("valid_from")));
 								discount.setTo(Utility.parseInputDateTime(request.getParameter("valid_upto")));
 								discount.setApplicable(request.getParameter("applicable").charAt(0));
-								if ( discount.getApplicable() == 'i' ) {
-									for ( String item: request.getParameterValues("item_list[]") ) {
-										System.out.println(item);
+								discount.setEmpId(authToken.getId());
+								if (discount.getApplicable() == 'i') {
+									for (String id : request.getParameterValues("item_list[]")) {
+										Discount.Item item = discount.new Item();
+										item.setItem(Integer.parseInt(id));
+										item.setType('i');
+										discount.addItem(item);
 									}
 								}
-								writeResponse(Processor.SUCCESS, json, response, "Discount added successfully!");
+								try {
+									result = business.sales.Processor.addDiscount(discount, authToken, con);
+								} catch (SQLException ex) {
+									writeErrorResponse(json, response, "Internal server error!");
+								}
+								writeResponse(result, json, response, "Discount added successfully!");
 								break;
 						}
 						connector.closeConnection(token);
@@ -185,14 +217,14 @@ public class Action extends HttpServlet {
 			}
 		}
 	}
-	
+
 	public void writeErrorResponse(JSONObject json, HttpServletResponse response, String errorMessage) throws IOException {
 		json.put("status", 2);
 		json.put("message", errorMessage);
 		PrintWriter writer = response.getWriter();
 		writer.print(json);
 	}
-	
+
 	public void writeResponse(char result, JSONObject json, HttpServletResponse response, String successMessage) throws IOException {
 		if (result == Processor.SUCCESS) {
 			json.put("status", 1);

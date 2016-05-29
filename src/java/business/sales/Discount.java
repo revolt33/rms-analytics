@@ -1,6 +1,11 @@
 package business.sales;
 
+import application.Utility;
+import java.util.ArrayList;
+import java.util.Calendar;
+
 public class Discount {
+
 	private String code;
 	private char type;
 	private float percentage;
@@ -12,7 +17,8 @@ public class Discount {
 	private int id;
 	private boolean active;
 	private int empId;
-	private String adddedBy;
+	private String addedBy;
+	private ArrayList<Item> itemList = new ArrayList<>();
 
 	public String getCode() {
 		return code;
@@ -24,6 +30,19 @@ public class Discount {
 
 	public char getType() {
 		return type;
+	}
+
+	public String getFormattedType() {
+		switch (type) {
+			case 'e':
+				return "Everyone";
+			case 'r':
+				return "Restricted";
+			case 's':
+				return "Sales";
+			default:
+				return "Unknown";
+		}
 	}
 
 	public void setType(char type) {
@@ -50,6 +69,10 @@ public class Discount {
 		return from;
 	}
 
+	public String getFormattedFrom() {
+		return Utility.getFormattedDate(from);
+	}
+
 	public void setFrom(long from) {
 		this.from = from;
 	}
@@ -58,12 +81,20 @@ public class Discount {
 		return to;
 	}
 
+	public String getFormattedTo() {
+		return Utility.getFormattedDate(to);
+	}
+
 	public void setTo(long to) {
 		this.to = to;
 	}
 
 	public char getApplicable() {
 		return applicable;
+	}
+	
+	public boolean getHasItemList() {
+		return applicable=='i';
 	}
 
 	public void setApplicable(char applicable) {
@@ -91,7 +122,7 @@ public class Discount {
 	}
 
 	public void setStatus(char status) {
-		this.active = status=='a';
+		this.active = status == 'a';
 	}
 
 	public int getEmpId() {
@@ -102,15 +133,24 @@ public class Discount {
 		this.empId = empId;
 	}
 
-	public String getAdddedBy() {
-		return adddedBy;
+	public String getAddedBy() {
+		return addedBy;
 	}
 
-	public void setAdddedBy(String adddedBy) {
-		this.adddedBy = adddedBy;
+	public void setAddedBy(String adddedBy) {
+		this.addedBy = adddedBy;
 	}
-	
+
+	public void addItem(Item item) {
+		itemList.add(item);
+	}
+
+	public ArrayList<Item> getItemList() {
+		return itemList;
+	}
+
 	public class Item {
+
 		private int id;
 		private char type;
 		private int item;

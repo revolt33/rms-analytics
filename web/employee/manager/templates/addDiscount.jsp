@@ -12,9 +12,9 @@
 																<div class="form-group">
 																				<label class="control-label col-xs-4" for="code">Code:</label>
 																				<div class="col-xs-7">
-																								<input type="text" class="form-control verify-input uppercase" url="${url}" param="verify_discount_code" minlength="3" maxlength="7" name="code" placeholder="unique discount code" required/>
+																								<input type="text" class="form-control verify-input text-uppercase" url="${url}" param="verify_discount_code" minlength="3" maxlength="7" name="code" placeholder="unique discount code" required/>
 																				</div>
-																				<div class="col-xs-1"><span id="verify-input-status" data-toggle="tooltip" data-container="body" title=""></span></div>
+																				<div class="col-xs-1"><span id="verify-input-status" data-toggle="tooltip" data-container="body"></span></div>
 																</div>
 																<div class="form-group">
 																				<label class="control-label col-xs-4" for="type">Type:</label>

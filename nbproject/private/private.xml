@@ -3,7 +3,13 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/E:/study/javaex/NetBeans/finalProject/src/java/business/stock/Processor.java</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/web/employee/utility.css</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/src/java/employee/manager/Action.java</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/src/java/business/sales/Processor.java</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/web/employee/manager/templates/discount-item-list.jsp</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/web/employee/manager/script.js</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/web/employee/manager/templates/addDiscount.jsp</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/web/employee/manager/index.jsp</file>
         </group>
     </open-files>
 </project-private>

@@ -1,5 +1,6 @@
 package business.stock;
 
+import application.Utility;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
@@ -31,15 +32,7 @@ public class Entry {
 	}
 	
 	public String getExpiryDateTime() {
-		return getFormattedDate(expiry);
-	}
-	
-	public String getFormattedDate(long time) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
-		cal.setTimeInMillis(time);
-		SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy hh:mm a");
-		return format.format(cal.getTime());
+		return Utility.getFormattedDate(expiry);
 	}
 
 	/**
@@ -64,7 +57,7 @@ public class Entry {
 	}
 	
 	public String getAddedTimestamp() {
-		return getFormattedDate(timestamp);
+		return Utility.getFormattedDate(timestamp);
 	}
 	
 	/**

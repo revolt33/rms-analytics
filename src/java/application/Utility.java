@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.TimeZone;
 
 public class Utility {
 	public static String getSuitableExtension(String type) {
@@ -30,5 +31,12 @@ public class Utility {
 			ex.printStackTrace();
 		}
 		return time.getTimeInMillis();
+	}
+	public static String getFormattedDate(long time) {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
+		cal.setTimeInMillis(time);
+		SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy hh:mm a");
+		return format.format(cal.getTime());
 	}
 }
