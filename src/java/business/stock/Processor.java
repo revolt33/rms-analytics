@@ -4,27 +4,13 @@ import business.employee.*;
 import java.sql.*;
 import java.util.*;
 import java.text.DecimalFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import business.Status;
 
 public class Processor {
 
-	public static final char MANAGER = 'm';
-	public static final char STOCK_EMPLOYEE = 's';
-	public static final char SALES_EMPLOYEE = 'l';
-	public static final char INACTIVE_EMPLOYEE = 'E';
-	public static final char USER_UNAVAILABLE = 'U';
-	public static final char INVALID_USER_TYPE = 'T';
-	public static final char SUCCESS = 'S';
-	public static final char INSUFFICIENT_STOCK = 'I';
-	public static final char ITEM_NOT_FOUND = 'i';
-	public static final char BATCH_NOT_FOUND = 'b';
-	public static final char INSUFFICIENT_BATCH_STOCK = 'B';
-	public static final char ERROR_OCCURED = 'e';
-
 	// To add a category in stock database, call this method
-	public static char addCategory(String name, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE )
+	public static Status addCategory(String name, AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE )
 			synchronized (con) {
 				try {
 					con.setCatalog("employee");
@@ -36,24 +22,24 @@ public class Processor {
 							st = con.createStatement();
 							st.executeUpdate("insert into category (name, added_by) values('"+name+"', "+authToken.getId()+")");
 						} else {
-							return INACTIVE_EMPLOYEE;
+							return Status.EXCEPTION_OCCURED;
 						}
 					} else {
-						return USER_UNAVAILABLE;
+						return Status.USER_UNAVAILABLE;
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 
 	//	call this method to edit a category
-	public static char editCategory(int id, String category, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE )
+	public static Status editCategory(int id, String category, AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE )
 			synchronized ( con ) {
 				try {
 					con.setCatalog("stock");
@@ -61,12 +47,12 @@ public class Processor {
 					st.executeUpdate("update category set name='"+category+"' where id="+id);
 				} catch (SQLException ex) {
 					ex.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 	
 	//	getCategories by calling this method
@@ -128,8 +114,8 @@ public class Processor {
 	}
 	
 	//	to revoke a category call this
-	public static char alterStatusOfCategory(int id, boolean active,AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public static Status alterStatusOfCategory(int id, boolean active,AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -137,19 +123,19 @@ public class Processor {
 					st.executeUpdate("update category set active='"+(active?"y":"n")+"' where id="+id);
 				} catch (SQLException ex) {
 					ex.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 	
 	// To add an item, call this method
 	public static Result addItem(Item item, AuthToken authToken, Connection con) {
 		Result result = new Result();
-		result.setStatus(ERROR_OCCURED);
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+		result.setStatus(Status.ERROR_OCCURED);
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -168,23 +154,23 @@ public class Processor {
 						}
 						st.executeUpdate("update item set image='img"+result.getCode()+item.getImageExt()+"' where id="+result.getCode()+";");
 						st.execute("commit;");
-						result.setStatus(SUCCESS);
+						result.setStatus(Status.SUCCESS);
 					} else {
 						st.execute("rollback;");
 					}
 				} catch (Exception e) {
 					e.printStackTrace();
-					result.setStatus(business.employee.Processor.EXCEPTION_OCCURED);
+					result.setStatus(Status.EXCEPTION_OCCURED);
 				}
 			}
 		} else
-			result.setStatus(INVALID_USER_TYPE);
+			result.setStatus(Status.INVALID_USER_TYPE);
 		return result;
 	}
 
 	// call this method to make an item available for purchase
-	public static char alterStatusOfItem(int id, boolean publish, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public static Status alterStatusOfItem(int id, boolean publish, AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -192,17 +178,17 @@ public class Processor {
 					st.executeUpdate("update item set active='"+(publish?"y":"n")+"' where id="+id);
 				} catch (SQLException e) {
 					e.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-				return INVALID_USER_TYPE;
-		return SUCCESS;
+				return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 
 	// call this method to update an item detail
-	public char alterItem(Item item, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public Status alterItem(Item item, AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -210,19 +196,19 @@ public class Processor {
 					st.executeUpdate("update item set name='"+item.getName()+"', image='"+item.getImage()+"', description='"+item.getDescription()+"', min_percentage="+item.getMinPercentage()+", on_order='"+item.getOnOrder()+"', delivery='"+item.getDelivery()+"' where id="+item.getId());
 				} catch (SQLException e) {
 					e.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 
 	// call this method to increse stock of an item
 	public static Result addItemInStock(int id, float count, long expiry, boolean override, AuthToken authToken, Connection con) {
 		Result result = new Result();
-		result.setStatus(SUCCESS);
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+		result.setStatus(Status.SUCCESS);
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				Statement st = null;
 				try {
@@ -248,7 +234,7 @@ public class Processor {
 							st.clearBatch();
 							st.addBatch("rollback;");
 							proceed = false;
-							result.setStatus(INSUFFICIENT_STOCK); //Insufficient Ingridients
+							result.setStatus(Status.INSUFFICIENT_STOCK); //Insufficient Ingridients
 							break;
 						}
 					}
@@ -263,17 +249,17 @@ public class Processor {
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
-					result.setStatus(business.employee.Processor.EXCEPTION_OCCURED);
+					result.setStatus(Status.EXCEPTION_OCCURED);
 				}
 			}
 		} else
-			result.setStatus(INVALID_USER_TYPE);
+			result.setStatus(Status.INVALID_USER_TYPE);
 		return result;
 	}
 
 	// call this method to reduce an item in Stock
-	public static char reduceStock(int batch, int id, float amount, String table,AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public static Status reduceStock(int batch, int id, float amount, String table,AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				Statement st = null;
 				try {
@@ -291,9 +277,9 @@ public class Processor {
 										st.executeUpdate("update "+table+"_entry set consumed=consumed+"+amount+" where id="+batch);
 										st.execute("commit;");
 									} else
-										return INSUFFICIENT_BATCH_STOCK;
+										return Status.INSUFFICIENT_BATCH_STOCK;
 								} else
-									return BATCH_NOT_FOUND;
+									return Status.BATCH_NOT_FOUND;
 							} else {
 								st.execute("start transaction;");
 								st.executeUpdate("update "+table+" set stock=stock-"+amount+" where id="+id);
@@ -303,9 +289,9 @@ public class Processor {
 								st.execute("commit;");
 							}
 						} else
-							return INSUFFICIENT_STOCK;
+							return Status.INSUFFICIENT_STOCK;
 					} else
-						return ITEM_NOT_FOUND;
+						return Status.ITEM_NOT_FOUND;
 				} catch (SQLException e) {
 					e.printStackTrace();
 					try {
@@ -313,18 +299,18 @@ public class Processor {
 					} catch (Exception ex) {
 						ex.printStackTrace();
 					}
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 	
 	//	call this method to get price variation
 	public static ArrayList<DataRender> getPriceHistory(int id, AuthToken authToken, Connection con) {
 		ArrayList<DataRender> list = new ArrayList<>();
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -350,7 +336,7 @@ public class Processor {
 	// call this method to get item unit list
 	public static ArrayList<Category> getItemConfig(AuthToken authToken, Connection con) {
 		ArrayList<Category> categories = new ArrayList<>();
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized ( con ) {
 				try {
 					con.setCatalog("stock");
@@ -392,8 +378,8 @@ public class Processor {
 	}
 	
 	// alter status of ItemUnit
-	public static char alterStatusOfUnit(int id, boolean active, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public static Status alterStatusOfUnit(int id, boolean active, AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -401,17 +387,17 @@ public class Processor {
 					st.executeUpdate("update item_config set status='"+(active?'a':'r')+"' where id="+id);
 				} catch (SQLException ex) {
 					ex.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 	
 	// call this method to add item unit
-	public static char addItemUnit(int item, String name, float fraction, float price, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public static Status addItemUnit(int item, String name, float fraction, float price, AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -425,17 +411,17 @@ public class Processor {
 					}
 				} catch (SQLException ex) {
 					ex.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 	
 	// call this method to change price of an item
-	public static char changePrice(int id, float value , AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public static Status changePrice(int id, float value , AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try{
 					con.setCatalog("stock");
@@ -445,16 +431,16 @@ public class Processor {
 					st.executeUpdate("insert into price (id, value, timestamp, added_by) values("+id+", "+value+", "+timestamp.getTimeInMillis()+", "+authToken.getId()+")");
 				} catch (SQLException ex) {
 					ex.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 	// call this method to remove a batch
-	public static char removeBatch(int id, String table, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public static Status removeBatch(int id, String table, AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				Statement st = null;
 				try {
@@ -472,20 +458,20 @@ public class Processor {
 						st.execute("rollback;");
 					} catch (SQLException ex) {
 						ex.printStackTrace();
-						return business.employee.Processor.EXCEPTION_OCCURED;
+						return Status.EXCEPTION_OCCURED;
 					}
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 
 	//	call this method to get list of ingridients
 	public static ArrayList<Ingredient> getIngridients(AuthToken authToken, Connection con) {
 		ArrayList<Ingredient> list = new ArrayList<>();
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -509,8 +495,8 @@ public class Processor {
 		return list;
 	}
 	// call this method to add an ingridient
-	public static char addIngridient(Ingredient ingridient, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ){
+	public static Status addIngridient(Ingredient ingridient, AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ){
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -518,18 +504,18 @@ public class Processor {
 					st.executeUpdate("insert into ingridients (name, state, added_by) values('"+ingridient.getName()+"', '"+ingridient.getState()+"', "+authToken.getId()+")");
 				} catch (Exception e) {
 					e.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 
 	// call this mehtod to add an ingridient stock
 	public static Result addIngridientStock(int id, float count, long expiry, AuthToken authToken, Connection con ) {
 		Result result = new Result();
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				Statement st = null;
 				try {
@@ -545,27 +531,26 @@ public class Processor {
 					ResultSet rs = st.executeQuery("select LAST_INSERT_ID();");
 					if ( rs.next() ) {
 						result.setCode(rs.getInt(1));
-						result.setStatus(SUCCESS);
+						result.setStatus(Status.SUCCESS);
 					}
 				} catch (SQLException e) {
 					e.printStackTrace();
+					result.setStatus(Status.EXCEPTION_OCCURED);
 					try {
 						st.execute("rollback;");
 					} catch (Exception ex) {
 						ex.printStackTrace();
-						result.setStatus(business.employee.Processor.EXCEPTION_OCCURED);
 					}
-					result.setStatus(business.employee.Processor.EXCEPTION_OCCURED);
 				}
 			}
 		} else
-			result.setStatus(INVALID_USER_TYPE);
+			result.setStatus(Status.INVALID_USER_TYPE);
 		return result;
 	}
 	//	call this method to get ingridient entry list
 	public static ArrayList<Entry> getIngridientEntry(int id, String table,AuthToken authToken, Connection con) {
 		ArrayList<Entry> list = new ArrayList<>();
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -600,8 +585,8 @@ public class Processor {
 	}
 
 	// call this mehtod to add a relation b/w item and ingridient
-	public static char addRelation(int item, int ingridient, double units, AuthToken authToken, Connection con) {
-		if( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public static Status addRelation(int item, int ingridient, double units, AuthToken authToken, Connection con) {
+		if( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			DecimalFormat df = new DecimalFormat();
 			df.setMaximumFractionDigits(2);
 			try {
@@ -610,17 +595,17 @@ public class Processor {
 				st.executeUpdate("insert into relation (item, ingridient, units, added_by) values("+item+", "+ingridient+", "+Float.parseFloat(df.format(units))+", "+authToken.getId()+");");
 			} catch (SQLException e) {
 				e.printStackTrace();
-				return business.employee.Processor.EXCEPTION_OCCURED;
+				return Status.EXCEPTION_OCCURED;
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 	
 	// call this method to get relations
 	public static ArrayList<Category> getRelations(AuthToken authToken, Connection con) {
 		ArrayList<Category> list = new ArrayList<>();
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized (con) {
 				try {
 					con.setCatalog("stock");
@@ -661,8 +646,8 @@ public class Processor {
 	}
 	
 	// call this method to remove a relation
-	public static char removeRelation(int id, AuthToken authToken, Connection con) {
-		if ( authToken.getType() == MANAGER || authToken.getType() == STOCK_EMPLOYEE ) {
+	public static Status removeRelation(int id, AuthToken authToken, Connection con) {
+		if ( authToken.getType() == Status.MANAGER || authToken.getType() == Status.STOCK_EMPLOYEE ) {
 			synchronized ( con ) {
 				try {
 					con.setCatalog("stock");
@@ -670,11 +655,11 @@ public class Processor {
 					st.executeUpdate("delete from relation where id="+id);
 				} catch (SQLException ex) {
 					ex.printStackTrace();
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return INVALID_USER_TYPE;
-		return SUCCESS;
+			return Status.INVALID_USER_TYPE;
+		return Status.SUCCESS;
 	}
 }

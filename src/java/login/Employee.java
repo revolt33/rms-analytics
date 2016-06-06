@@ -22,20 +22,20 @@ public class Employee extends HttpServlet {
 			if (token != null) {
 				ls = Processor.login(username, password, (remember.equals("on")), connector.getConnection(token));
 				switch (ls.getStatus()) {
-					case Processor.LOGIN_SUCCESS:
+					case LOGIN_SUCCESS:
 						success = true;
 						request.getSession().setAttribute("auth_token", ls.getToken());
 						break;
-					case Processor.INCORRECT_USERNAME:
+					case INCORRECT_USERNAME:
 						errorCode = "2";
 						break;
-					case Processor.INCORRECT_PASSWORD:
+					case INCORRECT_PASSWORD:
 						errorCode = "3";
 						break;
-					case Processor.EXCEPTION_OCCURED:
+					case EXCEPTION_OCCURED:
 						errorCode = "4";
 						break;
-					case Processor.INACTIVE_USER:
+					case INACTIVE_USER:
 						errorCode = "5";
 						break;
 				}
@@ -49,9 +49,10 @@ public class Employee extends HttpServlet {
 					cookies[0] = new Cookie("remember", "y");
 					cookies[1] = new Cookie("auth_token", ls.getToken().getAuthToken());
 					cookies[2] = new Cookie("id", ""+ls.getToken().getId());
-					cookies[3] = new Cookie("type", ""+ls.getToken().getType());
+					cookies[3] = new Cookie("type", ""+ls.getToken().getType().getStatus());
 					for ( Cookie cookie: cookies ) {
 						cookie.setMaxAge(86400*30);
+						cookie.setPath(getServletContext().getContextPath()+"/employee/");
 						response.addCookie(cookie);
 					}
 				}

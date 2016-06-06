@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import business.employee.*;
 import application.*;
+import business.Status;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
@@ -52,13 +53,15 @@ public class Login implements Filter {
 				authToken = new AuthToken();
 				authToken.setAuthToken(auth_token.getValue());
 				authToken.setId(Integer.parseInt(id.getValue()));
-				authToken.setType(type.getValue().charAt(0));
+				authToken.setType(Status.parseEmployee(type.getValue().charAt(0)));
 				Connector connector = (Connector) request.getServletContext().getAttribute("connector");
 				ConnectionToken token = connector.getToken();
 				authorized = Processor.authorize(authToken, true, connector.getConnection(token));
 				connector.closeConnection(token);
 				if (authorized) {
 					httpreq.getSession().setAttribute("auth_token", authToken);
+				} else {
+					authToken = null;
 				}
 			}
 			if (authorized) {

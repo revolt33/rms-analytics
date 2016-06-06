@@ -9,14 +9,13 @@ import business.employee.Processor;
 import business.sales.Discount;
 import business.stock.Result;
 import java.io.File;
+import business.Status;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -81,7 +80,7 @@ public class Action extends HttpServlet {
 					break;
 				}
 			}
-			char result = '\0';
+			Status result = Status.UNKNOWN;
 			AuthToken authToken = ((AuthToken) request.getSession().getAttribute("auth_token"));
 			Connection con = connector.getConnection(token);
 			if (proceed) {
@@ -116,7 +115,7 @@ public class Action extends HttpServlet {
 										emp.setImageExt(Utility.getSuitableExtension(request.getParameter("file-type")));
 										Result res = Processor.createEmp(emp, authToken, con);
 										boolean success = false;
-										if (res.getStatus() == Processor.SUCCESS) {
+										if (res.getStatus() == Status.SUCCESS) {
 											ServletContext context = getServletContext();
 											File root = new File(context.getRealPath("/"));
 											l:
@@ -140,7 +139,7 @@ public class Action extends HttpServlet {
 										writer.print(json);
 									}
 								} catch (SQLException ex) {
-									writeResponse(Processor.EXCEPTION_OCCURED, json, response, "");
+									writeResponse(Status.EXCEPTION_OCCURED, json, response, "");
 								}
 							}
 							break;
@@ -225,20 +224,20 @@ public class Action extends HttpServlet {
 		writer.print(json);
 	}
 
-	public void writeResponse(char result, JSONObject json, HttpServletResponse response, String successMessage) throws IOException {
-		if (result == Processor.SUCCESS) {
+	public void writeResponse(Status result, JSONObject json, HttpServletResponse response, String successMessage) throws IOException {
+		if (result == Status.SUCCESS) {
 			json.put("status", 1);
 			json.put("message", successMessage);
 		} else {
 			json.put("status", 0);
 			switch (result) {
-				case Processor.EXCEPTION_OCCURED:
+				case EXCEPTION_OCCURED:
 					json.put("message", "Internal server error!");
 					break;
-				case Processor.NOT_MANAGER:
+				case NOT_MANAGER:
 					json.put("message", "Manager level authorization required!");
 					break;
-				case Processor.UNAUTHORIZED_OPERATION:
+				case UNAUTHORIZED_OPERATION:
 					json.put("message", "UNAUTHORIZED OPERATION");
 					break;
 				default:
@@ -262,11 +261,11 @@ public class Action extends HttpServlet {
 		writer.print(json);
 	}
 
-	public void writeUploadResponse(char result, boolean success, JSONObject json, HttpServletResponse response, String successMessage, String errorMessage) throws IOException {
-		if (result == Processor.SUCCESS && success) {
+	public void writeUploadResponse(Status result, boolean success, JSONObject json, HttpServletResponse response, String successMessage, String errorMessage) throws IOException {
+		if (result == Status.SUCCESS && success) {
 			json.put("status", 1);
 			json.put("message", successMessage + " uploading file!");
-		} else if (result != Processor.SUCCESS) {
+		} else if (result != Status.SUCCESS) {
 			json.put("status", 2);
 			json.put("message", errorMessage + "!");
 		} else {

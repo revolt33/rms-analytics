@@ -344,6 +344,6 @@ function displayMessage(alert_class, sign, message) {
 				element.textContent = message;
 				$(feedback).append(element);
 				feedback.fadeIn(500).delay(3000).fadeOut(300, function () {
-								feedback.remove()
+								feedback.remove();
 				});
 }

@@ -1,14 +1,25 @@
 package business.stock;
 
+import business.Status;
+
 public class Result {
-	private char status;
+	private Status status;
 	private int code;
-	public void setStatus(char status) {
+	private String token;
+	public void setStatus(Status status) {
 		this.status = status;
 	}
-	public char getStatus() {return status;}
+	public Status getStatus() {return status;}
 	public void setCode(int code) {
 		this.code = code;
 	}
 	public int getCode() {return code;}
+
+	public String getToken() {
+		return token;
+	}
+
+	public void setToken(String token) {
+		this.token = token;
+	}
 }

@@ -16,8 +16,8 @@
         <servlet-class>login.Employee</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>logout</servlet-name>
-        <servlet-class>application.Logout</servlet-class>
+        <servlet-name>employee-logout</servlet-name>
+        <servlet-class>employee.Logout</servlet-class>
     </servlet>
     <servlet>
         <servlet-name>employee-manager-action</servlet-name>
@@ -30,6 +30,26 @@
     <servlet>
         <servlet-name>Action</servlet-name>
         <servlet-class>employee.sales.Action</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>user-signup</servlet-name>
+        <servlet-class>signup.User</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>customer-password</servlet-name>
+        <servlet-class>business.customer.Password</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>customer-login</servlet-name>
+        <servlet-class>login.Customer</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>user-logout</servlet-name>
+        <servlet-class>user.Logout</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>user-action</servlet-name>
+        <servlet-class>user.Action</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>employee-login</servlet-name>
@@ -51,35 +71,43 @@
         <servlet-name>employee-redirect</servlet-name>
         <url-pattern>/employee/</url-pattern>
     </servlet-mapping>
-				<filter>
+    <filter>
         <filter-name>login-employee-filter</filter-name>
         <filter-class>filter.employee.Login</filter-class>
     </filter>
-				<filter-mapping>
-        <filter-name>login-employee-filter</filter-name>
-        <url-pattern>/employee/*</url-pattern>
-    </filter-mapping>
+    <filter>
+        <filter-name>login-user-filter</filter-name>
+        <filter-class>filter.user.Login</filter-class>
+    </filter>
     <filter>
         <filter-name>redirect-stock-filter</filter-name>
         <filter-class>filter.employee.stock.Observer</filter-class>
     </filter>
+    <filter>
+        <filter-name>redirect-sales-filter</filter-name>
+        <filter-class>filter.employee.sales.Observer</filter-class>
+    </filter>
+    <filter>
+        <filter-name>redirect-manager-filter</filter-name>
+        <filter-class>filter.employee.manager.Observer</filter-class>
+    </filter>
+    <filter-mapping>
+        <filter-name>login-user-filter</filter-name>
+        <url-pattern>/user/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>login-employee-filter</filter-name>
+        <url-pattern>/employee/*</url-pattern>
+    </filter-mapping>
     <filter-mapping>
         <filter-name>redirect-stock-filter</filter-name>
         <url-pattern>/employee/stock/*</url-pattern>
     </filter-mapping>
-				<filter>
-								<filter-name>redirect-sales-filter</filter-name>
-								<filter-class>filter.employee.sales.Observer</filter-class>
-				</filter>
-				<filter-mapping>
-								<filter-name>redirect-sales-filter</filter-name>
-								<url-pattern>/employee/sales/*</url-pattern>
-				</filter-mapping>
-				<filter>
-        <filter-name>redirect-manager-filter</filter-name>
-        <filter-class>filter.employee.manager.Observer</filter-class>
-    </filter>
-				<filter-mapping>
+    <filter-mapping>
+        <filter-name>redirect-sales-filter</filter-name>
+        <url-pattern>/employee/sales/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
         <filter-name>redirect-manager-filter</filter-name>
         <url-pattern>/employee/manager/*</url-pattern>
     </filter-mapping>
@@ -87,8 +115,8 @@
         <listener-class>application.Initializer</listener-class>
     </listener>
     <servlet-mapping>
-        <servlet-name>logout</servlet-name>
-        <url-pattern>/logout</url-pattern>
+        <servlet-name>employee-logout</servlet-name>
+        <url-pattern>/employee/logout</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
         <servlet-name>employee-manager-action</servlet-name>
@@ -101,6 +129,26 @@
     <servlet-mapping>
         <servlet-name>Action</servlet-name>
         <url-pattern>/employee/sales/Action</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>user-signup</servlet-name>
+        <url-pattern>/user.signup</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>customer-password</servlet-name>
+        <url-pattern>/setup/password</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>customer-login</servlet-name>
+        <url-pattern>/user.login</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>user-logout</servlet-name>
+        <url-pattern>/user/logout</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>user-action</servlet-name>
+        <url-pattern>/user/Action</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>125</session-timeout>

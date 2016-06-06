@@ -1,0 +1,75 @@
+#outer-container {
+				margin-top: 5vh;
+}
+#taskbar {
+				min-height: 85vh;
+				height: 100%;
+				border-right: 1px solid #245269;
+}
+#taskbar > div:first-child {
+				padding: 10px;
+				font-size: 1.2em;
+				border-top-left-radius: 5px;
+				border-top-right-radius: 5px;
+}
+#taskbar .list-group-item:first-child {
+				border-top-left-radius: 0px;
+				border-top-right-radius: 0px;
+}
+.content-header {
+				border-bottom: 1px solid #101010;
+				padding: 10px;
+				border-top-left-radius: 5px;
+				border-top-right-radius: 5px;
+}
+.icon > span.glyphicon {
+				cursor: pointer;
+				margin-left: 15px;
+}
+#overlay {
+				display: none;
+}
+#load-screen {
+				display: none;
+				position: absolute;
+				top: 50vh;
+				width: 200px;
+				height: 200px;
+				margin-left: 45%;
+				background: url(../img/gears.svg);
+}
+#dialog {
+				margin-top: 4vh;
+				width: 100%;
+}
+.disable {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				z-index: 2;
+				background-color: rgba(255,255,255,0.8);
+				cursor: not-allowed;
+}
+#status-bar {
+				position: fixed;
+				bottom: 10vh;
+				display: none;
+				width: 40vw;
+				margin-left: 30vw;
+				z-index: 7;
+}
+#scroll-top {
+				position: fixed;
+				bottom: 40px;
+				right: 30px;
+				font-size: 3em;
+				color: #333;
+				display: none;
+				z-index: 10;
+				transition: color 0.5s;
+}
+#scroll-top > span {
+				cursor: pointer;
+}

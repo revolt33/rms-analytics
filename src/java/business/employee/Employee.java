@@ -1,5 +1,7 @@
 package business.employee;
 
+import business.Status;
+
 public class Employee {
 
 	private String name;
@@ -150,12 +152,12 @@ public class Employee {
 	}
 
 	public String getEmpType() {
-		switch (type) {
-			case Processor.MANAGER:
+		switch (Status.parseEmployee(type)) {
+			case MANAGER:
 				return "Manager";
-			case Processor.SALES_EMPLOYEE:
+			case SALES_EMPLOYEE:
 				return "Sales";
-			case Processor.STOCK_EMPLOYEE:
+			case STOCK_EMPLOYEE:
 				return "Stock";
 			default:
 				return "Unknown";

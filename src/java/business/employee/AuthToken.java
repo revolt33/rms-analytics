@@ -1,9 +1,12 @@
 package business.employee;
+
+import business.Status;
+
 public class AuthToken {
 
 	private int id;
 	private String authToken;
-	private char type;
+	private Status type;
 	private String name;
 
 	public void setId(int id) {
@@ -14,10 +17,10 @@ public class AuthToken {
 		this.authToken = authToken;
 	}
 	public String getAuthToken() {return authToken;}
-	public void setType(char type) {
+	public void setType(Status type) {
 		this.type = type;
 	}
-	public char getType() {return type;}
+	public Status getType() {return type;}
 	public void setName(String name) {
 		this.name = name;
 	}

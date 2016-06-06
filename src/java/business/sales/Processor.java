@@ -1,5 +1,6 @@
 package business.sales;
 
+import business.Status;
 import business.employee.AuthToken;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -12,7 +13,7 @@ import java.util.logging.Logger;
 
 public class Processor {
 	public static boolean isUniqueDiscountCode(String code, AuthToken authToken, Connection con) throws SQLException {
-		if ( authToken.getType() == business.stock.Processor.MANAGER ) {
+		if ( authToken.getType() == Status.MANAGER ) {
 			synchronized (con) {
 				con.setCatalog("sales");
 				Statement st = con.createStatement();
@@ -26,8 +27,8 @@ public class Processor {
 		}
 		return true;
 	}
-	public static char addDiscount(Discount discount, AuthToken authToken, Connection con) throws SQLException {
-		if ( authToken.getType() == business.stock.Processor.MANAGER ) {
+	public static Status addDiscount(Discount discount, AuthToken authToken, Connection con) throws SQLException {
+		if ( authToken.getType() == Status.MANAGER ) {
 			Statement st = null;
 			synchronized ( con ) {
 				try {
@@ -46,17 +47,17 @@ public class Processor {
 					ex.printStackTrace();
 					if ( st != null )
 						st.execute("rollback;");
-					return business.employee.Processor.EXCEPTION_OCCURED;
+					return Status.EXCEPTION_OCCURED;
 				}
 			}
 		} else
-			return business.employee.Processor.NOT_MANAGER;
-		return business.stock.Processor.SUCCESS;
+			return Status.NOT_MANAGER;
+		return Status.SUCCESS;
 	}
 	
 	public static ArrayList<Discount> getDiscountList(AuthToken authToken, Connection con) {
 		ArrayList<Discount> list = new ArrayList<>();
-		if ( authToken.getType() == business.stock.Processor.MANAGER ) {
+		if ( authToken.getType() == Status.MANAGER ) {
 			synchronized ( con ) {
 				try {
 					con.setCatalog("sales");

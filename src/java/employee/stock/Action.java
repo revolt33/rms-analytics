@@ -3,6 +3,7 @@ package employee.stock;
 import application.ConnectionToken;
 import application.Connector;
 import application.Utility;
+import business.Status;
 import business.employee.AuthToken;
 import business.stock.Category;
 import business.stock.DataRender;
@@ -41,7 +42,7 @@ public class Action extends HttpServlet {
 				break;
 			}
 		}
-		char result = '\0';
+		Status result;
 		AuthToken authToken = ((AuthToken) request.getSession().getAttribute("auth_token"));
 		Connection con = connector.getConnection(token);
 		if (proceed && param != null) {
@@ -84,7 +85,7 @@ public class Action extends HttpServlet {
 							item.setImageExt(Utility.getSuitableExtension(request.getParameter("file-type")));
 							Result rs = Processor.addItem(item, authToken, con);
 							boolean success = false;
-							if (rs.getStatus() == Processor.SUCCESS) {
+							if (rs.getStatus() == Status.SUCCESS) {
 								ServletContext context = getServletContext();
 								File root = new File(context.getRealPath("/"));
 								l:
@@ -180,11 +181,11 @@ public class Action extends HttpServlet {
 
 	}
 
-	public void writeUploadResponse(char result, boolean success, JSONObject json, HttpServletResponse response, String successMessage, String errorMessage) throws IOException {
-		if (result == Processor.SUCCESS && success) {
+	public void writeUploadResponse(Status result, boolean success, JSONObject json, HttpServletResponse response, String successMessage, String errorMessage) throws IOException {
+		if (result == Status.SUCCESS && success) {
 			json.put("status", 1);
 			json.put("message", successMessage + " uploading file!");
-		} else if (result != Processor.SUCCESS) {
+		} else if (result != Status.SUCCESS) {
 			json.put("status", 2);
 			json.put("message", errorMessage + "!");
 		} else {
@@ -202,17 +203,17 @@ public class Action extends HttpServlet {
 		writer.print(json);
 	}
 
-	public void writeUpdateResponse(char result, JSONObject json, HttpServletResponse response, String successMessage) throws IOException {
+	public void writeUpdateResponse(Status result, JSONObject json, HttpServletResponse response, String successMessage) throws IOException {
 		switch (result) {
-			case Processor.SUCCESS:
+			case SUCCESS:
 				json.put("status", 1);
 				json.put("message", successMessage);
 				break;
-			case Processor.INSUFFICIENT_BATCH_STOCK:
+			case INSUFFICIENT_BATCH_STOCK:
 				json.put("status", 0);
 				json.put("message", "Insuffucient batch stock!");
 				break;
-			case Processor.INSUFFICIENT_STOCK:
+			case INSUFFICIENT_STOCK:
 				json.put("status", 0);
 				json.put("message", "Insufficient stock!");
 				break;
@@ -227,13 +228,13 @@ public class Action extends HttpServlet {
 
 	public void writeBatchUpdate(Result result, JSONObject json, HttpServletResponse response, String successMessage, String errorMessage) throws IOException {
 		switch (result.getStatus()) {
-			case Processor.SUCCESS:
+			case SUCCESS:
 				json.put("status", 10);
 				json.put("message", successMessage);
 				json.put("batch", result.getCode());
 				json.put("url", response.encodeURL("templates/batchCode.jsp"));
 				break;
-			case Processor.INSUFFICIENT_STOCK:
+			case INSUFFICIENT_STOCK:
 				json.put("status", 9);
 				json.put("message", errorMessage);
 				break;

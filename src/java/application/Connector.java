@@ -21,12 +21,9 @@ public class Connector {
 			token = connections.first();
 		} else {
 			try {
-				Class.forName("com.mysql.jdbc.Driver");
 				Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/?user="+username+"&password="+password);
 				count++;
 				token = new ConnectionToken(con, count, lastAccessed);
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
 			} catch (SQLException e) {
 				e.printStackTrace();
 				if ( connections.size() > 0 ) {

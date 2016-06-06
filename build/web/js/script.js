@@ -115,4 +115,53 @@ $(document).ready(function () {
 												return false;
 								}
 				});
-})
+				$('#login-form form').on('submit', function (e) {
+								console.log('djsad');
+								var formData = $(this).serialize();
+								var action = $(this).attr('action');
+								$.ajax({
+												data: formData,
+												url: action,
+												type: 'POST',
+												success: function (data) {
+																var response = $.parseJSON(data);
+																var status = response['status'];
+																var message = response['message'];
+																console.log(message);
+																if ( status == 1 ) {
+																				location.reload();
+																} else {
+																				errorMessage(message);
+																}
+												}
+								});
+								e.preventDefault();
+				});
+});
+window.onload = function (){
+				status_bar = $('#status-bar').clone();
+				$('#status-bar').detach();
+};
+function errorMessage(message) {
+				var sign = document.createElement('span');
+				$(sign).addClass('glyphicon glyphicon-remove-sign pull-left');
+				displayMessage('alert-danger', sign, message);
+}
+function successMessage(message) {
+				var sign = document.createElement('span');
+				$(sign).addClass('glyphicon glyphicon-ok-circle pull-left');
+				displayMessage('alert-success', sign, message);
+}
+function displayMessage(alert_class, sign, message) {
+				$('#status-bar').remove();
+				var feedback = status_bar.clone();
+				$('body').append(feedback);
+				feedback.addClass(alert_class);
+				$(feedback).append(sign);
+				var element = document.createElement('span');
+				element.textContent = message;
+				$(feedback).append(element);
+				feedback.fadeIn(500).delay(3000).fadeOut(300, function () {
+								feedback.remove();
+				});
+}

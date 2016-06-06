@@ -3,7 +3,7 @@
 				<head>
 								<title>Corporate Login</title>
 								<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-								<jsp:include page="/resource/include.jsp"></jsp:include>
+								<jsp:include page="/resource/include.jsp" />
 												<style type="text/css">
 																#mid {
 																				margin-top: 25vh;

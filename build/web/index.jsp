@@ -1,3 +1,4 @@
+<%@page import="business.customer.CustomerAuthToken"%>
 <%@page import="java.sql.Connection"%>
 <%@page import="application.ConnectionToken"%>
 <%@page import="application.Connector"%>
@@ -26,10 +27,30 @@
 				<body>
 								<nav>
 												<div class="nav-element left">RMS & Analytics Tool</div>
-												<div class="nav-element right" id="login-signup">Login / Signup</div>
-												<div class="nav-element right"><a href="employee/">Employee Portal</a></div>
+												<%
+				CustomerAuthToken authToken = (CustomerAuthToken) request.getSession().getAttribute("customer_auth_token");
+				if (authToken != null) {
+												%>
+												<div class="dropdown pull-right">
+																<div class="dropdown-toggle nav-element" data-toggle="dropdown">${sessionScope.customer_auth_token.name}<span class="caret"></span></div>
+																<ul class="dropdown-menu">
+																				<c:url value="/user/" var="url"></c:url>
+																				<li><a href="${url}">Account Settings</a></li>
+																				<c:url value="/user/logout" var="logout_url"></c:url>
+																				<li><a href="${logout_url}">Logout</a></li>
+																</ul>
+												</div>
+												<%
+			} else {%>
+												<div class="nav-element pull-right" id="login-signup">Login / Signup</div>
+												<div class="nav-element pull-right"><a href="employee/">Employee Portal</a></div>
+												<%}
+												%>
 
 								</nav>
+								<div id="status-bar" class="alert fade in text-center">
+												<a href="#" class="close status-close" data-dismiss="alert" area-label="close">&times;</a><span></span>
+								</div>
 								<div id="container">	
 												<img src="img/r21.jpg" id="img1"/>
 												<div id="down" title="Click to view menu"><span class="glyphicon glyphicon-chevron-down"></span></div>
@@ -38,30 +59,46 @@
 												<div id="form-container">
 																<div id="close"><span class="glyphicon glyphicon-remove"></span></div>
 																<div id="signup-form" class="panel panel-primary">
-																				<div class="panel-heading">Signup for Delicious treat!</div>
+																				<div class="panel-heading text-center">Signup</div>
 																				<div class="panel-body">
-																								<input type="text" class="form-control marginalise" name="name" placeholder="Name">
-																								<input type="text" class="form-control marginalise" name="userid" placeholder="choose a username">
-																								<input type="text" class="form-control marginalise" name="email" placeholder="your email-id">
-																								<div class="btn-group btn-group-justified marginalise" role="group">
-																												<div class="btn-group" role="group">
-																																<button type="button" class="btn btn-primary" id="signup">Signup</button>
+																								<c:url var="url" value="/user.signup"></c:url>
+																								<form class="form-horizontal" action="${url}" method="POST">
+																												<div class="form-group col-xs-12">
+																																<input type="text" class="form-control" name="name" maxlength="50" placeholder="Name" required/>
 																												</div>
-																								</div>
+																												<div class="form-group col-xs-12">
+																																<input type="text" class="form-control" name="username" maxlength="20" placeholder="choose a username" required/>
+																												</div>
+																												<div class="form-group col-xs-12">
+																																<input type="email" class="form-control" name="email" placeholder="your email-id" required/>
+																												</div>
+																												<div class="form-group col-xs-12">
+																																<button class="btn btn-primary btn-group-justified" type="submit">Signup</button>
+																												</div>
+																								</form>
 																				</div>
 																</div>
 																<div id="or">OR</div>
 																<div id="login-form" class="panel panel-primary">
 																				<div class="panel-heading">Already have an account! Log In</div>
 																				<div class="panel-body">
-																								<input type="text" class="form-control marginalise" name="userid" placeholder="username">
-																								<input type="password" class="form-control marginalise" name="password" placeholder="password">
-																								<div class="marginalise"><input type="checkbox" id="remember" />Remember me</div>
-																								<div class="btn-group btn-group-justified marginalise" role="group">
-																												<div class="btn-group" role="group">
-																																<button type="button" class="btn btn-primary" id="login">LogIn</button>
+																								<c:url value="/user.login" var="url"></c:url>
+																								<form class="form-horizontal" method="POST" action="${url}">
+																												<div class="form-group col-sm-12">
+																																<input type="text" class="form-control" name="username" placeholder="username" required/>
 																												</div>
-																								</div>
+																												<div class="form-group col-sm-12">
+																																<input type="password" class="form-control" name="password" placeholder="password" required/>
+																												</div>
+																												<div class="form-group col-sm-12">
+																																<div class="checkbox">
+																																				<label><input type="checkbox" name="remember" />Remember me</label>
+																																</div>
+																												</div>
+																												<div class="form-group col-sm-12">
+																																<button class="btn btn-primary btn-group-justified" type="submit">Login</button>
+																												</div>
+																								</form>
 																				</div>	
 																</div>
 												</div>
@@ -98,7 +135,8 @@
 
 																																<c:if test="${item.active}">
 																																				<%
-										if (count % 2 == 0) {
+										if (count
+											% 2 == 0) {
 											out.print("<div class=\"item-wrap\">");
 										}
 										count++;
@@ -133,14 +171,16 @@
 																																								</div>
 																																				</div>
 																																				<%
-										if (count % 2 == 0) {
+										if (count
+											% 2 == 0) {
 											out.print("</div>");
 										}
 																																				%>
 																																</c:if>
 																												</c:forEach>
 																												<%
-								if (count % 2 == 1) {
+								if (count
+									% 2 == 1) {
 									out.print("</div>");
 								}
 																												%>

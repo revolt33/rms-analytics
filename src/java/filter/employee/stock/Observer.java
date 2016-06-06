@@ -1,5 +1,6 @@
 package filter.employee.stock;
 
+import business.Status;
 import business.employee.AuthToken;
 import java.io.IOException;
 import javax.servlet.Filter;
@@ -24,7 +25,7 @@ public class Observer implements Filter {
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpSession session = ((HttpServletRequest) request).getSession();
 		AuthToken authToken = (AuthToken) session.getAttribute("auth_token");
-		if (authToken.getType() == business.employee.Processor.STOCK_EMPLOYEE || authToken.getType() == business.employee.Processor.MANAGER) {
+		if (authToken.getType() == Status.STOCK_EMPLOYEE || authToken.getType() == Status.MANAGER) {
 			chain.doFilter(request, response);
 		} else {
 			HttpServletResponse httpRes = (HttpServletResponse) response;

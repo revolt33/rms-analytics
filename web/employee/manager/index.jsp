@@ -35,7 +35,7 @@
 																								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>${sessionScope.auth_token.name}<span class="caret"></span></a>
 																								<ul class="dropdown-menu">
 																												<li><a href="#">Settings</a></li>
-																																<c:url var="logout_url" value="/logout"></c:url>
+																																<c:url var="logout_url" value="/employee/logout"></c:url>
 																												<li><a href="${logout_url}">Logout</a></li>
 																								</ul>
 																				</li>

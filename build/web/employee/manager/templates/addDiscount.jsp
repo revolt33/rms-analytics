@@ -8,7 +8,7 @@
 								</div>
 								<div class="panel-body">
 												<c:url var="url" value="Action"></c:url>
-												<form class="form-horizontal" id="discount-form" action="${url}" method="POST" close="overlay" post-target="view_discount">
+												<form class="form-horizontal" id="discount-form" action="${url}" method="POST" close="overlay" post-target="view_user_details">
 																<div class="form-group">
 																				<label class="control-label col-xs-4" for="code">Code:</label>
 																				<div class="col-xs-7">

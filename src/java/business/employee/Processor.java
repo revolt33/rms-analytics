@@ -5,31 +5,18 @@ import business.hashing.Password;
 import business.Utility;
 import business.stock.Result;
 import java.util.ArrayList;
+import business.Status;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Processor {
-
-	public static final char MANAGER = 'm';
-	public static final char SALES_EMPLOYEE = 'l';
-	public static final char STOCK_EMPLOYEE = 's';
-	public static final char USER_UNAVAILABLE = 'U';
-	public static final char USER_LOGGED_OUT = 'L';
-	public static final char NOT_MANAGER = 'M';
-	public static final char LOGIN_SUCCESS = 's';
-	public static final char INCORRECT_USERNAME = 'I';
-	public static final char EXCEPTION_OCCURED = 'X';
-	public static final char FAILED = 'F';
-	public static final char SUCCESS = 'S';
-	public static final char INCORRECT_PASSWORD = 'P';
-	public static final char INCORRECT_TOKEN = 'T';
-	public static final char INACTIVE_USER = 'A';
-	public static final char UNAUTHORIZED_OPERATION = 'Z';
 
 	// call this method to create new employee
 	public static Result createEmp(Employee employee, AuthToken authToken, Connection con) {
 		Result result = new Result();
-		result.setStatus(FAILED);
+		result.setStatus(Status.FAILED);
 		String random = "";
-		if (authToken.getType() == MANAGER) {
+		if (authToken.getType() == Status.MANAGER) {
 			synchronized (con) {
 				Statement st = null;
 				try {
@@ -43,27 +30,27 @@ public class Processor {
 						result.setCode(rs.getInt(1));
 						st.executeUpdate("update emp set photo='img" + result.getCode() + employee.getImageExt() + "' where id=" + result.getCode());
 						st.execute("commit;");
-						result.setStatus(SUCCESS);
+						result.setStatus(Status.SUCCESS);
 					}
 				} catch (Exception e) {
 					try {
 						st.execute("rollback;");
 					} catch (SQLException ex) {
 						e.printStackTrace();
-						result.setStatus(FAILED);
+						result.setStatus(Status.FAILED);
 					}
 					e.printStackTrace();
-					result.setStatus(FAILED);
+					result.setStatus(Status.FAILED);
 				}
 			}
 		} else {
-			result.setStatus(NOT_MANAGER);
+			result.setStatus(Status.NOT_MANAGER);
 		}
 		return result;
 	}
 
 	public static boolean checkUsername(String username, AuthToken authToken, Connection con) throws SQLException {
-		if (authToken.getType() == MANAGER) {
+		if (authToken.getType() == Status.MANAGER) {
 			synchronized (con) {
 				con.setCatalog("employee");
 				Statement st = con.createStatement();
@@ -97,24 +84,37 @@ public class Processor {
 							st.executeUpdate("update emp set auth_token='" + token + "', remember='" + (remember ? 'y' : 'n') + "' where id=" + id);
 							authToken.setId(id);
 							authToken.setAuthToken(token);
-							authToken.setType(type);
+							authToken.setType(Status.parseEmployee(type));
 							authToken.setName(name);
-							ls = new LoginStatus(authToken, LOGIN_SUCCESS);
+							ls = new LoginStatus(authToken, Status.LOGIN_SUCCESS);
 						} else {
-							ls = new LoginStatus(null, INCORRECT_PASSWORD);
+							ls = new LoginStatus(null, Status.INCORRECT_PASSWORD);
 						}
 					} else {
-						ls = new LoginStatus(null, INACTIVE_USER);
+						ls = new LoginStatus(null, Status.INACTIVE_USER);
 					}
 				} else {
-					ls = new LoginStatus(null, INCORRECT_USERNAME);
+					ls = new LoginStatus(null, Status.INCORRECT_USERNAME);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				ls = new LoginStatus(null, EXCEPTION_OCCURED);
+				ls = new LoginStatus(null, Status.EXCEPTION_OCCURED);
 			}
 		}
 		return ls;
+	}
+	
+	public static void logout(AuthToken authToken, Connection con) {
+		synchronized (con) {
+			try {
+				con.setCatalog("employee");
+				Statement st = con.createStatement();
+				st.executeUpdate("update emp set remember='n', auth_token='"+Utility.getRandomString(6)+"' where id="+authToken.getId());
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+			
+		}
 	}
 
 	// call this method to authorize an employee
@@ -126,13 +126,13 @@ public class Processor {
 				ResultSet rs = st.executeQuery("select auth_token, active, type, remember, name from emp where id=" + authToken.getId());
 				if (rs.next()) {
 					if (remember) {
-						if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && rs.getString(3).charAt(0) == authToken.getType() && rs.getString(4).charAt(0) == 'y') {
+						if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && Status.parseEmployee(rs.getString(3).charAt(0)) == authToken.getType() && rs.getString(4).charAt(0) == 'y') {
 							authToken.setName(rs.getString(5));
 							return true;
 						} else {
 							return false;
 						}
-					} else if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && rs.getString(3).charAt(0) == authToken.getType()) {
+					} else if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && Status.parseEmployee(rs.getString(3).charAt(0)) == authToken.getType()) {
 						return true;
 					} else {
 						return false;
@@ -184,18 +184,18 @@ public class Processor {
 						AuthToken authToken = new AuthToken();
 						authToken.setAuthToken(Utility.getRandomString(6));
 						authToken.setId(id);
-						authToken.setType(rs.getString(2).charAt(0));
+						authToken.setType(Status.parseEmployee(rs.getString(2).charAt(0)));
 						st.executeUpdate("update emp set password='" + password + "', auth_token='" + authToken.getAuthToken() + "' where id=" + id);
-						ls = new LoginStatus(authToken, 's');
+						ls = new LoginStatus(authToken, Status.SUCCESS);
 					} else {
-						ls = new LoginStatus(null, INCORRECT_TOKEN);
+						ls = new LoginStatus(null, Status.INCORRECT_TOKEN);
 					}
 				} else {
-					ls = new LoginStatus(null, INCORRECT_USERNAME);
+					ls = new LoginStatus(null, Status.INCORRECT_USERNAME);
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				ls = new LoginStatus(null, EXCEPTION_OCCURED);
+				ls = new LoginStatus(null, Status.EXCEPTION_OCCURED);
 			}
 		}
 		return ls;
@@ -204,7 +204,7 @@ public class Processor {
 	//	Get employee list
 	public static ArrayList<Employee> getEmployeeList(AuthToken authToken, Connection con) {
 		ArrayList<Employee> list = new ArrayList<>();
-		if (authToken.getType() == MANAGER) {
+		if (authToken.getType() == Status.MANAGER) {
 			synchronized (con) {
 				try {
 					con.setCatalog("employee");
@@ -233,8 +233,8 @@ public class Processor {
 	}
 
 	//	Activate/Deactivate Employee
-	public static char alterStatusOfEmployee(int id, boolean activate, AuthToken authToken, Connection con) {
-		if (authToken.getType() == MANAGER) {
+	public static Status alterStatusOfEmployee(int id, boolean activate, AuthToken authToken, Connection con) {
+		if (authToken.getType() == Status.MANAGER) {
 			if (authToken.getId() != id) {
 				synchronized (con) {
 					try {
@@ -243,22 +243,22 @@ public class Processor {
 						st.executeUpdate("update emp set active='" + (activate ? "y" : "n") + "' where id=" + id);
 					} catch (SQLException ex) {
 						ex.printStackTrace();
-						return EXCEPTION_OCCURED;
+						return Status.EXCEPTION_OCCURED;
 					}
 				}
 			} else {
-				return UNAUTHORIZED_OPERATION;
+				return Status.UNAUTHORIZED_OPERATION;
 			}
 		} else {
-			return NOT_MANAGER;
+			return Status.NOT_MANAGER;
 		}
-		return SUCCESS;
+		return Status.SUCCESS;
 	}
 
 	//	call this method to view employee detail
 	public static Employee getEmpDetail(int id, AuthToken authToken, Connection con) {
 		Employee emp = null;
-		if (authToken.getType() == MANAGER) {
+		if (authToken.getType() == Status.MANAGER) {
 			synchronized (con) {
 				try {
 					con.setCatalog("employee");

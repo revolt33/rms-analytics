@@ -3,6 +3,7 @@ package employee;
 import java.io.*;
 import javax.servlet.http.*;
 import business.employee.*;
+import business.Status;
 
 public class Redirect extends HttpServlet {
     @Override
@@ -11,13 +12,13 @@ public class Redirect extends HttpServlet {
 		AuthToken authToken = (AuthToken) session.getAttribute("auth_token");
 		String url ="";
 		switch (authToken.getType()) {
-			case business.stock.Processor.MANAGER:
+			case MANAGER:
 				url = "manager/";
 				break;
-			case business.stock.Processor.STOCK_EMPLOYEE:
+			case STOCK_EMPLOYEE:
 				url = "stock/";
 				break;
-			case business.stock.Processor.SALES_EMPLOYEE:
+			case SALES_EMPLOYEE:
 				url = "sales/";
 				break;
 		}

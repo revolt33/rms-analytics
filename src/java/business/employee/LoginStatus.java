@@ -1,14 +1,16 @@
 package business.employee;
 
+import business.Status;
+
 public class LoginStatus {
 	// upon login this class will contain login status and AuthToken object
 	// for successful login status = true and otherwise {false and token = null}
 	private AuthToken token;
-	private char status;
-	public LoginStatus(AuthToken token, char status) {
+	private Status status;
+	public LoginStatus(AuthToken token, Status status) {
 		this.token = token;
 		this.status = status;
 	}
 	public AuthToken getToken() {return token;}
-	public char getStatus() {return status;}
+	public Status getStatus() {return status;}
 }
