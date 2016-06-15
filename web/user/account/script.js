@@ -99,7 +99,6 @@ function submitForm(link, data, close, method, postTarget, form) {
 								url: link,
 								data: data,
 								success: function (data) {
-												console.log(data);
 												var json = $.parseJSON(data);
 												var status = json['status'];
 												var destruct = true;
@@ -112,23 +111,6 @@ function submitForm(link, data, close, method, postTarget, form) {
 																												return false;
 																								}
 																				});
-																				break;
-																case 9:
-																				destruct = false;
-																				if (confirm(json['message'])) {
-																								$(form).find('input[name=override]').val('true');
-																								$(form).submit();
-																				}
-																				break;
-																case 10:
-																				successMessage(json['message']);
-																				$('.list-group-item').each(function () {
-																								if ($(this).attr('param') == postTarget) {
-																												$(this).trigger('click');
-																												return false;
-																								}
-																				});
-																				load(json['url'], 'batch=' + json['batch'], 'top-dialog', 'top-overlay', 'GET', '');
 																				break;
 																default:
 																				errorMessage(json['message']);

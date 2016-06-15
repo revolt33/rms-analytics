@@ -3,7 +3,7 @@ package user;
 import application.ConnectionToken;
 import application.Connector;
 import business.customer.Customer;
-import business.customer.CustomerAuthToken;
+import business.customer.AuthToken;
 import business.customer.Processor;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -22,7 +22,7 @@ public class Action extends HttpServlet {
 		String param = request.getParameter("param");
 		Connector connector = (Connector) getServletContext().getAttribute("connector");
 		ConnectionToken token = connector.getToken();
-		CustomerAuthToken authToken = (CustomerAuthToken) request.getSession().getAttribute("customer_auth_token");
+		AuthToken authToken = (AuthToken) request.getSession().getAttribute("customer_auth_token");
 		Connection con = connector.getConnection(token);
 		if ( authToken != null ) {
 			if ( con != null ) {
@@ -30,7 +30,11 @@ public class Action extends HttpServlet {
 					case "view_user_details":
 						Customer customer = Processor.getUserDetail(authToken, con);
 						request.setAttribute("user_details", customer);
-						RequestDispatcher dispatcher = request.getRequestDispatcher("resources/customerDetails.jsp");
+						RequestDispatcher dispatcher = request.getRequestDispatcher("/user/account/resources/customerDetails.jsp");
+						dispatcher.forward(request, response);
+						break;
+					case "view_addresses":
+						dispatcher = request.getRequestDispatcher("/user/account/resources/address.jsp");
 						dispatcher.forward(request, response);
 						break;
 				}
@@ -44,7 +48,7 @@ public class Action extends HttpServlet {
 		String param = request.getParameter("param");
 		Connector connector = (Connector) getServletContext().getAttribute("connector");
 		ConnectionToken token = connector.getToken();
-		CustomerAuthToken authToken = (CustomerAuthToken) request.getSession().getAttribute("customer_auth_token");
+		AuthToken authToken = (AuthToken) request.getSession().getAttribute("customer_auth_token");
 		Connection con = connector.getConnection(token);
 		if ( authToken != null ) {
 			if ( con != null ) {

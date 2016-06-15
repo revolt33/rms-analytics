@@ -103,17 +103,17 @@ public class Processor {
 		}
 		return ls;
 	}
-	
+
 	public static void logout(AuthToken authToken, Connection con) {
 		synchronized (con) {
 			try {
 				con.setCatalog("employee");
 				Statement st = con.createStatement();
-				st.executeUpdate("update emp set remember='n', auth_token='"+Utility.getRandomString(6)+"' where id="+authToken.getId());
+				st.executeUpdate("update emp set remember='n', auth_token='" + Utility.getRandomString(6) + "' where id=" + authToken.getId());
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 			}
-			
+
 		}
 	}
 
@@ -129,22 +129,16 @@ public class Processor {
 						if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && Status.parseEmployee(rs.getString(3).charAt(0)) == authToken.getType() && rs.getString(4).charAt(0) == 'y') {
 							authToken.setName(rs.getString(5));
 							return true;
-						} else {
-							return false;
 						}
 					} else if (rs.getString(1).equals(authToken.getAuthToken()) && rs.getString(2).charAt(0) == 'y' && Status.parseEmployee(rs.getString(3).charAt(0)) == authToken.getType()) {
 						return true;
-					} else {
-						return false;
 					}
-				} else {
-					return false;
 				}
 			} catch (Exception e) {
 				e.printStackTrace();
-				return false;
 			}
 		}
+		return false;
 	}
 
 	// call this method to change fp_token

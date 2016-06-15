@@ -159,6 +159,8 @@ public class Employee {
 				return "Sales";
 			case STOCK_EMPLOYEE:
 				return "Stock";
+			case DELIVERY_BOY:
+				return "Delivery Boy";
 			default:
 				return "Unknown";
 		}

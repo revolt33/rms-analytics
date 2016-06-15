@@ -22,7 +22,7 @@ public class Logout extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		Connector connector = (Connector) getServletContext().getAttribute("connector");
 		ConnectionToken token = connector.getToken();
-		AuthToken authToken = (AuthToken) request.getSession().getAttribute("auth_token");
+		AuthToken authToken = (AuthToken) request.getSession().getAttribute("employee_auth_token");
 		Connection con = connector.getConnection(token);
 		Processor.logout(authToken, con);
 		connector.closeConnection(token);

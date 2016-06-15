@@ -33,51 +33,28 @@ public class Customer extends HttpServlet {
 					case SUCCESS:
 						request.getSession().setAttribute("customer_auth_token", ls.getToken());
 						if ( remember.equals("on") ) {
-							Cookie[] cookies = new Cookie[2];
-							cookies[0] = new Cookie("remember", "y");
-							cookies[1] = new Cookie("id", "" + ls.getToken().getId());
+							Cookie[] cookies = new Cookie[3];
+							cookies[0] = new Cookie("remember_customer", "y");
+							cookies[1] = new Cookie("customer_id", "" + ls.getToken().getId());
+							cookies[2] = new Cookie("customer_auth_token", ls.getToken().getAuthToken());
 							for (Cookie cookie : cookies) {
 								cookie.setMaxAge(86400 * 30);
 								response.addCookie(cookie);
 							}
 						}
-						writeResponse(response, "Login Successful!");
+						response.sendRedirect(getServletContext().getContextPath()+"/");
 						break;
 					case INCORRECT_PASSWORD:
-						writeErrorResponse(response, "Password is incorrect!");
+						response.sendRedirect(response.encodeRedirectURL(getServletContext().getContextPath()+"/?error=user_password"));
 						break;
 					case INCORRECT_USERNAME:
-						writeErrorResponse(response, "Username is incorrect!");
+						response.sendRedirect(response.encodeRedirectURL(getServletContext().getContextPath()+"/?error=user_username"));
 						break;
 					case EXCEPTION_OCCURED:
-						writeErrorResponse(response, "Internal Server Error!");
+						response.sendRedirect(response.encodeRedirectURL(getServletContext().getContextPath()+"/?error=user_error"));
 						break;
 				}
 			}
-		}
-	}
-	public void writeResponse(HttpServletResponse response, String successMessage) {
-		JSONObject json = new JSONObject();
-		json.put("status", 1);
-		json.put("message", successMessage);
-		PrintWriter writer;
-		try {
-			writer = response.getWriter();
-			writer.print(json);
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
-	}
-	public void writeErrorResponse(HttpServletResponse response, String successMessage) {
-		JSONObject json = new JSONObject();
-		json.put("status", 0);
-		json.put("message", successMessage);
-		PrintWriter writer;
-		try {
-			writer = response.getWriter();
-			writer.print(json);
-		} catch (IOException ex) {
-			ex.printStackTrace();
 		}
 	}
 }

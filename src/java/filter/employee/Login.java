@@ -21,22 +21,22 @@ public class Login implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) {
 		HttpServletRequest httpreq = (HttpServletRequest) request;
-		AuthToken authToken = (AuthToken) httpreq.getSession().getAttribute("auth_token");
+		AuthToken authToken = (AuthToken) httpreq.getSession().getAttribute("employee_auth_token");
 		HttpServletResponse httpres = (HttpServletResponse) response;
 		Cookie remember = null, auth_token = null, id = null, type = null;
 		if (httpreq.getCookies() != null) {
 			for (Cookie cookie : httpreq.getCookies()) {
 				switch (cookie.getName()) {
-					case "remember":
+					case "remember_employee":
 						remember = cookie;
 						break;
-					case "auth_token":
+					case "employee_auth_token":
 						auth_token = cookie;
 						break;
-					case "id":
+					case "employee_id":
 						id = cookie;
 						break;
-					case "type":
+					case "employee_type":
 						type = cookie;
 						break;
 				}
@@ -59,7 +59,7 @@ public class Login implements Filter {
 				authorized = Processor.authorize(authToken, true, connector.getConnection(token));
 				connector.closeConnection(token);
 				if (authorized) {
-					httpreq.getSession().setAttribute("auth_token", authToken);
+					httpreq.getSession().setAttribute("employee_auth_token", authToken);
 				} else {
 					authToken = null;
 				}
@@ -78,9 +78,7 @@ public class Login implements Filter {
 				else
 					httpres.sendRedirect(httpres.encodeRedirectURL(request.getServletContext().getContextPath()+"/login.jsp?error=1"));
 			}
-		} catch (ServletException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
+		} catch (ServletException | IOException e) {
 			e.printStackTrace();
 		}
 	}

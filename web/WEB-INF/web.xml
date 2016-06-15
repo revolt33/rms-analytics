@@ -48,8 +48,16 @@
         <servlet-class>user.Logout</servlet-class>
     </servlet>
     <servlet>
-        <servlet-name>user-action</servlet-name>
+        <servlet-name>user-account-action</servlet-name>
         <servlet-class>user.Action</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>user-checkout</servlet-name>
+        <servlet-class>user.Checkout</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>user-coupon</servlet-name>
+        <servlet-class>user.Coupon</servlet-class>
     </servlet>
     <servlet-mapping>
         <servlet-name>employee-login</servlet-name>
@@ -111,6 +119,10 @@
         <filter-name>redirect-manager-filter</filter-name>
         <url-pattern>/employee/manager/*</url-pattern>
     </filter-mapping>
+    <filter-mapping>
+        <filter-name>login-user-filter</filter-name>
+        <url-pattern>/index.jsp</url-pattern>
+    </filter-mapping>
     <listener>
         <listener-class>application.Initializer</listener-class>
     </listener>
@@ -147,8 +159,16 @@
         <url-pattern>/user/logout</url-pattern>
     </servlet-mapping>
     <servlet-mapping>
-        <servlet-name>user-action</servlet-name>
-        <url-pattern>/user/Action</url-pattern>
+        <servlet-name>user-account-action</servlet-name>
+        <url-pattern>/user/account/Action</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>user-checkout</servlet-name>
+        <url-pattern>/user/checkout/</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>user-coupon</servlet-name>
+        <url-pattern>/user/checkout/coupon</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>125</session-timeout>

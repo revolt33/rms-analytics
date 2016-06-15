@@ -224,4 +224,15 @@ public class Item {
 	public void setPrice(float price) {
 		this.price = price;
 	}
+	
+	public ItemUnit getFirstUnit() {
+		ItemUnit firstUnit = null;
+		for ( ItemUnit unit: itemUnits ) {
+			if ( unit.getStatus() && !unit.getIsDefault() ) {
+				firstUnit = unit;
+				break;
+			}
+		}
+		return firstUnit;
+	}
 }

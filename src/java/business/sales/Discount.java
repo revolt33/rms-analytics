@@ -152,7 +152,6 @@ public class Discount {
 	public class Item {
 
 		private int id;
-		private char type;
 		private int item;
 		private String name; // name of item
 
@@ -162,14 +161,6 @@ public class Discount {
 
 		public void setId(int id) {
 			this.id = id;
-		}
-
-		public char getType() {
-			return type;
-		}
-
-		public void setType(char type) {
-			this.type = type;
 		}
 
 		public int getItem() {

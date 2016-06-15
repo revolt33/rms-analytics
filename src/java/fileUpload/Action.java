@@ -1,5 +1,6 @@
 package fileUpload;
 
+import application.Utility;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -27,9 +28,9 @@ public class Action extends HttpServlet {
 				if (iterator.hasNext()) {
 					FileItemStream stream = iterator.next();
 					if (!stream.isFormField()) {
-						if (isSuitableExtension(stream.getContentType())) {
+						if (Utility.isSuitableExtension(stream.getContentType())) {
 							int code = ((Integer) request.getSession().getAttribute("code")).intValue();
-							String ext = getSuitableExtension(stream.getContentType());
+							String ext = Utility.getSuitableExtension(stream.getContentType());
 							long length = Streams.copy(stream.openStream(), new FileOutputStream(dir.getAbsolutePath() + File.separator + "img" + code + ""+ext), true);
 							json.put("status", 1);
 							json.put("message", "File uploaded successfully!");
@@ -56,22 +57,5 @@ public class Action extends HttpServlet {
 		}
 		PrintWriter writer = response.getWriter();
 		writer.print(json);
-	}
-
-	boolean isSuitableExtension(String type) {
-		return (type.equals("image/png") || type.equals("image/jpg") || type.equals("image/jpeg"));
-	}
-
-	String getSuitableExtension(String type) {
-		switch (type) {
-			case "image/png":
-				return ".png";
-			case "image/jpg":
-				return ".jpg";
-			case "image/jpeg":
-				return ".jpeg";
-			default:
-				return "";
-		}
 	}
 }

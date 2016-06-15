@@ -39,7 +39,7 @@ public class Processor {
 					if ( discount.getApplicable() == 'i' ) {
 						st.execute("SET @id = LAST_INSERT_ID()");
 						for ( Discount.Item item: discount.getItemList() ) {
-							st.executeUpdate("insert into discount_list (discount, type, id) values(@id, '"+item.getType()+"', "+item.getItem()+");");
+							st.executeUpdate("insert into discount_list (discount, id) values(@id, "+item.getItem()+");");
 						}
 					}
 					st.execute("commit;");
@@ -63,7 +63,7 @@ public class Processor {
 					con.setCatalog("sales");
 					Statement st = con.createStatement();
 					ResultSet rs = st.executeQuery("select * from discount join employee.emp on added_by=emp.id");
-					PreparedStatement ps = con.prepareStatement("select discount_list.id, discount_list.type, discount, item.name from discount_list join stock.item on discount_list.id=stock.item.id where discount=?");
+					PreparedStatement ps = con.prepareStatement("select discount_list.id, discount, item.name from discount_list join stock.item on discount_list.id=stock.item.id where discount=?");
 					while ( rs.next() ) {
 						Discount discount = new Discount();
 						discount.setId(rs.getInt("discount.id"));
@@ -83,7 +83,6 @@ public class Processor {
 								Discount.Item item = discount.new Item();
 								item.setId(resultSet.getInt("discount"));
 								item.setItem(resultSet.getInt("id"));
-								item.setType(resultSet.getString("type").charAt(0));
 								item.setName(resultSet.getString("name"));
 								discount.addItem(item);
 							}

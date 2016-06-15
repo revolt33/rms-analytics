@@ -1,13 +1,15 @@
+/* global status_bar */
+
 $(document).ready(function () {
 				$("#login-signup").click(function () {
-								$("#overlay").fadeIn(400);
+								$("#overlay").removeClass("hidden").fadeIn(400);
 				});
 				$("#close").click(function () {
-								$("#overlay").fadeOut(200);
+								$("#overlay").fadeOut(400);
 				});
 				$(window).scroll(function () {
 								var position = $('#menu').offset().top;
-								if ($(window).scrollTop() > (position - 50) ){
+								if ($(window).scrollTop() > (position - 50)) {
 												$('#navigation').removeClass('loose').addClass('hinge');
 												$('#cart').removeClass('loose').addClass('hinge');
 								} else {
@@ -40,108 +42,203 @@ $(document).ready(function () {
 								$('.cart-item').each(function () {
 												if ($(this).attr('code') == code) {
 																proceed = false;
-																var amount = parseInt($(this).attr('amount'));
+																var quantity = parseInt($(this).attr('quantity'));
 																var price = parseFloat($(this).attr('price'));
 																total = price;
-																$(this).attr('amount', ++amount);
-																$(this).children('.cart-item-price').text('Cost: ' + (amount) + ' x ' + price + ' = ' + (price * amount) + ' INR');
+																$(this).attr('quantity', ++quantity);
+																$(this).children('.cart-item-price').text('Cost: ' + (quantity) + ' x ' + price + ' = ' + (price * quantity) + ' INR');
 																return false;
 												}
 								});
 								if (proceed) {
 												var title = $(this).parent().children('.item-title').text();
+												if ($(this).hasClass('has-units')) {
+																var unit = $(this).parent().find('.btn-success');
+																title += ' (' + unit[0].firstChild.nodeValue + ')';
+												}
 												var price = parseFloat($(this).parent().children('.item-price').attr('price'));
-												var amount = price;
-												var str = '<div class="cart-item" code="' + code + '" price="' + price + '" amount="' + 1 + '">';
-												str += '<div class="remove-cart-item" title="Remove"><span class="glyphicon glyphicon-trash"></span></div>';
-												str += '<div class="reduce-cart-item" title="Reduce"><span class="glyphicon glyphicon-scissors"></span></div>'
-												str += '<div class="cart-item-title">' + title + '</div>';
-												str += '<div class="cart-item-price">Cost: 1 x ' + price + ' = ' + amount + ' INR</div>';
-												str += '</div>';
-												var element = $(str);
+												var element = createCartItem(code, title, price, 1)
 												$('#cart-content').append(element);
 												$(element).slideDown(200);
 												total = price;
 								}
+								refreshCart(parseInt(code), 1);
 								var amount = parseFloat($('#total').attr('price'));
 								$('#total').text('Total: ' + (amount + total) + ' INR');
 								$('#total').attr('price', (amount + total));
-								$('#checkout').css({'cursor': 'pointer'});
+								$('#checkout button').css({'cursor': 'pointer'});
 				});
 				$(document).on('click', '.remove-cart-item', function () {
-								var amount = parseInt($(this).parent().attr('amount'));
+								var quantity = parseInt($(this).parent().attr('quantity'));
 								var price = parseFloat($(this).parent().attr('price'));
 								$(this).parent().slideUp(300, function () {
-												var amount1 = amount * price;
+												var amount = quantity * price;
 												var total = parseFloat($('#total').attr('price'));
-												$('#total').attr('price', (total - amount1));
-												$('#total').text('Total: ' + (total - amount1) + ' INR');
+												$('#total').attr('price', (total - amount));
+												$('#total').text('Total: ' + (total - amount) + ' INR');
 												$(this).remove();
 												if ($('.cart-item').length > 0) {
-																$('#checkout').css({'cursor': 'pointer'});
+																$('#checkout button').css({'cursor': 'pointer'});
 												} else {
-																$('#checkout').css({'cursor': 'not-allowed'});
+																$('#checkout button').css({'cursor': 'not-allowed'});
 												}
 								});
+								refreshCart(parseInt($(this).parent().attr('code')), 0);
+				});
+				$(document).on('click', '.item-unit', function () {
+								$(this).parent().children().not(this).addClass('btn-info').removeClass('btn-success');
+								$(this).removeClass('btn-info').addClass('btn-success');
+								$(this).parent().parent().children('.item-price').text('Price: ' + $(this).children('.badge').text() + ' INR').attr('price', $(this).children('.badge').text());
+								$(this).parent().parent().attr('code', $(this).attr('code'));
 				});
 				$(document).on('click', '.reduce-cart-item', function () {
-								var amount = parseInt($(this).parent().attr('amount'));
+								var quantity = parseInt($(this).parent().attr('quantity'));
 								var price = parseFloat($(this).parent().attr('price'));
-								if (amount > 1) {
-												$(this).parent().attr('amount', --amount);
-												$(this).parent().children('.cart-item-price').text('Cost: ' + amount + ' x ' + price + ' = ' + (amount * price) + ' INR');
+								if (quantity > 1) {
+												$(this).parent().attr('quantity', --quantity);
+												$(this).parent().children('.cart-item-price').text('Cost: ' + quantity + ' x ' + price + ' = ' + (quantity * price) + ' INR');
 												var total = parseFloat($('#total').attr('price'));
 												$('#total').attr('price', (total - price));
 												$('#total').text('Total: ' + (total - price) + ' INR');
 								} else {
 												$(this).parent().slideUp(300, function () {
-																var amount1 = amount * price;
+																var amount = quantity * price;
 																var total = parseFloat($('#total').attr('price'));
-																$('#total').attr('price', (total - amount1));
-																$('#total').text('Total: ' + (total - amount1) + ' INR');
+																$('#total').attr('price', (total - amount));
+																$('#total').text('Total: ' + (total - amount) + ' INR');
 																$(this).remove();
 																if ($('.cart-item').length > 0) {
-																				$('#checkout').css({'cursor': 'pointer'});
+																				$('#checkout button').css({'cursor': 'pointer'});
 																} else {
-																				$('#checkout').css({'cursor': 'not-allowed'});
+																				$('#checkout button').css({'cursor': 'not-allowed'});
 																}
 												});
 								}
+								refreshCart(parseInt($(this).parent().attr('code')), -1);
 				});
-				$('#checkout').click(function () {
+				$('#checkout').submit(function (e) {
 								if (parseFloat($('#total').attr('price')) > 0) {
-												console.log('checkout');
+												$(this).find('input').remove();
+												var form = this;
+												$('.cart-item').each(function () {
+																var element = document.createElement('input');
+																$(element).attr('type', 'hidden').attr('name', 'unit[]').attr('value', ('' + $(this).attr('code') + ',' + $(this).attr('quantity')));
+																$(form).append(element);
+												});
 								} else {
-												return false;
+												e.preventDefault();
 								}
 				});
-				$('#login-form form').on('submit', function (e) {
-								console.log('djsad');
-								var formData = $(this).serialize();
-								var action = $(this).attr('action');
-								$.ajax({
-												data: formData,
-												url: action,
-												type: 'POST',
-												success: function (data) {
-																var response = $.parseJSON(data);
-																var status = response['status'];
-																var message = response['message'];
-																console.log(message);
-																if ( status == 1 ) {
-																				location.reload();
-																} else {
-																				errorMessage(message);
+});
+window.onload = function () {
+				if (navigator.cookieEnabled) {
+								var cart = readCookie('cart');
+								var total = 0;
+								if (cart != null && cart.getValue().length > 0) {
+												var str = cart.getValue();
+												str = str.substring(1, str.length - 1);
+												var units = str.split('],[');
+												for (var index in units) {
+																var id = parseInt(units[index].split(',')[0]);
+																var found = false;
+																var title, price;
+																$('.item').each(function () {
+																				title = $(this).find('.item-title').text();
+																				if ($(this).find('.add-item').hasClass('has-units')) {
+																								$(this).find('.item-unit').each(function () {
+																												if (parseInt($(this).attr('code')) === id) {
+																																title += ' (' + $(this)[0].firstChild.nodeValue + ')';
+																																price = parseFloat($(this).find('.badge').text());
+																																found = true;
+																																return false;
+																												}
+																								});
+																				} else {
+																								if (parseInt($(this).attr('code')) === id) {
+																												price = parseFloat($(this).find('.item-price').attr('price'));
+																												found = true;
+																								}
+																				}
+																				if (found)
+																								return false;
+																});
+																if (found) {
+																				var quantity = parseInt(units[index].split(',')[1]);
+																				var element = createCartItem(id, title, price, quantity);
+																				$('#cart-content').append(element);
+																				$(element).slideDown();
+																				total += quantity * price;
 																}
 												}
-								});
-								e.preventDefault();
-				});
-});
-window.onload = function (){
+												$('#total').attr('price', (total));
+												$('#total').text('Total: ' + (total) + ' INR');
+												if ($('.cart-item').length > 0) {
+																$('#checkout button').css({'cursor': 'pointer'});
+												} else {
+																$('#checkout button').css({'cursor': 'not-allowed'});
+												}
+								}
+				}
 				status_bar = $('#status-bar').clone();
 				$('#status-bar').detach();
 };
+function createCartItem(code, title, price, quantity) {
+				var cart_item = document.createElement('div');
+				$(cart_item).attr('code', code).attr('price', price).attr('quantity', quantity).addClass('cart-item');
+				var remove_cart_item = document.createElement('div');
+				$(remove_cart_item).attr('title', 'Remove').addClass('remove-cart-item');
+				var remove_cart_item_icon = document.createElement('span');
+				$(remove_cart_item_icon).addClass('glyphicon glyphicon-trash');
+				$(remove_cart_item).append(remove_cart_item_icon);
+				var reduce_cart_item = document.createElement('div');
+				$(reduce_cart_item).attr('title', 'Reduce').addClass('reduce-cart-item');
+				var reduce_cart_item_icon = document.createElement('span');
+				$(reduce_cart_item_icon).addClass('glyphicon glyphicon-scissors');
+				$(reduce_cart_item).append(reduce_cart_item_icon);
+				var cart_item_title = document.createElement('div');
+				$(cart_item_title).addClass('cart-item-title').text(title);
+				var cart_item_price = document.createElement('div');
+				$(cart_item_price).addClass('cart-item-price').text('Cost: ' + quantity + ' x ' + price + ' = ' + (quantity * price) + ' INR');
+				$(cart_item).append(remove_cart_item).append(reduce_cart_item).append(cart_item_title).append(cart_item_price);
+				return cart_item;
+}
+function refreshCart(id, amount) {
+				if (navigator.cookieEnabled) {
+								var cart = readCookie('cart');
+								if (cart === null)
+												cart = new Cookie('cart', '', 30);
+								var str = cart.getValue();
+								var list = new String();
+								if (str.length === 0 && amount > 0) {
+												list = '[' + id + ',' + amount + ']';
+								} else if (str.length > 0) {
+												str = str.substring(1, str.length - 1);
+												var units = str.split('],[');
+												var found = false;
+												for (var index in units) {
+																if (parseInt(units[index].split(',')[0]) === id) {
+																				if (amount === 0) {
+																								units[index] = '' + id + ',0';
+																				} else {
+																								units[index] = '' + id + ',' + (parseInt(units[index].split(',')[1]) + amount);
+																				}
+																				found = true;
+																				break;
+																}
+												}
+												if (!found && amount > 0) {
+																units.push('' + id + ',' + amount);
+												}
+												for (var index in units) {
+																if (parseInt(units[index].split(',')[1]) > 0) {
+																				list += (index > 0 ? ',' : '') + '[' + units[index] + ']';
+																}
+												}
+								}
+								writeCookie(new Cookie('cart', list, 30));
+				} else
+								return false;
+}
 function errorMessage(message) {
 				var sign = document.createElement('span');
 				$(sign).addClass('glyphicon glyphicon-remove-sign pull-left');

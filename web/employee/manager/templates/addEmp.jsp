@@ -29,6 +29,7 @@
 																												<option value="s">Stock</option>
 																												<option value="l" selected>Sales</option>
 																												<option value="m" >Manager</option>
+																												<option value="d">Delivery Boy</option>
 																								</select>
 																				</div>
 																</div>

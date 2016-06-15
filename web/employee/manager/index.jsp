@@ -32,7 +32,7 @@
 																								<c:url var="stock_url" value="../stock/"></c:url>
 																				<li><a href="${stock_url}">Stock</a></li>
 																				<li class="dropdown">
-																								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>${sessionScope.auth_token.name}<span class="caret"></span></a>
+																								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>${sessionScope.employee_auth_token.name}<span class="caret"></span></a>
 																								<ul class="dropdown-menu">
 																												<li><a href="#">Settings</a></li>
 																																<c:url var="logout_url" value="/employee/logout"></c:url>
@@ -48,8 +48,8 @@
 																<div class="bg-info text-center">Taskbar</div>
 																<div class="list-group">
 																				<c:url var="list_url" value="Action"></c:url>
-																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_emp" target="content">View Employee</a>
-																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_discount" target="content">View Discount</a>
+																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_emp" target="content">Employee List</a>
+																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_discount" target="content">Discounts</a>
 																				<a href="#" class="list-group-item">Stock</a>
 																				<a href="#" class="list-group-item">Stock</a>
 																				<a href="#" class="list-group-item">Stock</a>

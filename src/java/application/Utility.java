@@ -39,4 +39,8 @@ public class Utility {
 		SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy hh:mm a");
 		return format.format(cal.getTime());
 	}
+	
+	public static boolean isSuitableExtension(String type) {
+		return (type.equals("image/png") || type.equals("image/jpg") || type.equals("image/jpeg"));
+	}
 }

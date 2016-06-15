@@ -12,7 +12,7 @@ public class Observer implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 		HttpSession session = ((HttpServletRequest)request).getSession();
-		AuthToken authToken = (AuthToken) session.getAttribute("auth_token");
+		AuthToken authToken = (AuthToken) session.getAttribute("employee_auth_token");
 		if ( authToken.getType() == Status.MANAGER ) {
 			chain.doFilter(request, response);
 		} else {

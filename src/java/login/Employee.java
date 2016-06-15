@@ -46,10 +46,10 @@ public class Employee extends HttpServlet {
 			if (success) {
 				if ( remember.equals("on") ){
 					Cookie[] cookies = new Cookie[4];
-					cookies[0] = new Cookie("remember", "y");
-					cookies[1] = new Cookie("auth_token", ls.getToken().getAuthToken());
-					cookies[2] = new Cookie("id", ""+ls.getToken().getId());
-					cookies[3] = new Cookie("type", ""+ls.getToken().getType().getStatus());
+					cookies[0] = new Cookie("remember_employee", "y");
+					cookies[1] = new Cookie("employee_auth_token", ls.getToken().getAuthToken());
+					cookies[2] = new Cookie("employee_id", ""+ls.getToken().getId());
+					cookies[3] = new Cookie("employee_type", ""+ls.getToken().getType().getStatus());
 					for ( Cookie cookie: cookies ) {
 						cookie.setMaxAge(86400*30);
 						cookie.setPath(getServletContext().getContextPath()+"/employee/");

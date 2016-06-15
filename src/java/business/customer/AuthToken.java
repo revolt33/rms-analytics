@@ -1,6 +1,8 @@
 package business.customer;
 
-public class CustomerAuthToken {
+public class AuthToken {
+	
+	private String authToken;
 	private int id;
 	private String name;
 
@@ -18,5 +20,13 @@ public class CustomerAuthToken {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getAuthToken() {
+		return authToken;
+	}
+
+	public void setAuthToken(String authToken) {
+		this.authToken = authToken;
 	}
 }

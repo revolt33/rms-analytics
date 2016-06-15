@@ -29,7 +29,7 @@
 																</div>
 																<ul class="nav navbar-nav navbar-right">
 																				<%
-						if (((AuthToken) (session.getAttribute("auth_token"))).getType() == Status.MANAGER) {
+						if (((AuthToken) (session.getAttribute("employee_auth_token"))).getType() == Status.MANAGER) {
 																				%>
 																				<c:url var="manager_url" value="../manager/"></c:url>
 																				<li><a href="${manager_url}">Manager</a></li>
@@ -41,7 +41,7 @@
 										}
 																								%>
 																				<li class="dropdown">
-																								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>${sessionScope.auth_token.name}<span class="caret"></span></a>
+																								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>${sessionScope.employee_auth_token.name}<span class="caret"></span></a>
 																								<ul class="dropdown-menu">
 																												<li><a href="#">Settings</a></li>
 																																<c:url var="logout_url" value="/employee/logout"></c:url>

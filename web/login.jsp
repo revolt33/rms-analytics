@@ -13,7 +13,7 @@
 								<body>
 												<nav class="nav navbar-inverse">
 																<div class="navbar-header">
-																<c:url var="url" value="/index.jsp"></c:url>
+																<c:url var="url" value="/"></c:url>
 																<a href="${url}" class="navbar-brand">RMS Analytics Tool</a>
 												</div>
 								</nav>

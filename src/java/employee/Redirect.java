@@ -9,7 +9,7 @@ public class Redirect extends HttpServlet {
     @Override
 	public void doGet(HttpServletRequest request, HttpServletResponse response) {
 		HttpSession session = request.getSession();
-		AuthToken authToken = (AuthToken) session.getAttribute("auth_token");
+		AuthToken authToken = (AuthToken) session.getAttribute("employee_auth_token");
 		String url ="";
 		switch (authToken.getType()) {
 			case MANAGER:

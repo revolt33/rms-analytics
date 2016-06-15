@@ -32,7 +32,7 @@
 												<div class="panel-body">
 																<c:forEach var="item" items="${cat.itemList}">
 																				<c:if test="${item.active}">
-																								<div class="col-xs-4 item">
+																								<div class="col-sm-6 item">
 																												<div class="panel panel-info">
 																																<div class="panel-heading">${item.name}</div>
 																																<div class="panel-body">

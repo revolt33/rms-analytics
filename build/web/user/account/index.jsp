@@ -16,33 +16,18 @@
 								<div id="status-bar" class="alert fade in text-center">
 												<a href="#" class="close status-close" data-dismiss="alert" area-label="close">&times;</a><span></span>
 								</div>
-								<nav class="nav navbar-inverse">
-												<c:url var="project_url" value="/"></c:url>
-																<div class="container-fluid">
-																				<div class="navbar-header">
-																								<a href="${project_url}" class="navbar-brand">RMS & Analytics Tool</a>
-																</div>
-
-																<ul class="nav navbar-nav navbar-right">
-																				<li class="dropdown">
-																								<a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="glyphicon glyphicon-user"></span>${sessionScope.customer_auth_token.name}<span class="caret"></span></a>
-																								<ul class="dropdown-menu">
-																												<c:url var="logout_url" value="/user/logout"></c:url>
-																																<li><a href="${logout_url}">Logout</a></li>
-																												</ul>
-																								</li>
-																				</ul>
-																</div>
-												</nav>
-												<div class="container" id="outer-container">
-																<div class="col-md-3" id="taskbar">
+								<jsp:include page="/user/templates/header.jsp" />
+												<div class="container-fluid" id="outer-container">
+																<div class="col-md-2" id="taskbar">
 																				<div class="bg-info text-center">Taskbar</div>
 																				<div class="list-group">
 																				<c:url var="list_url" value="Action"></c:url>
 																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_user_details" target="content">Your Info</a>
+																				<c:url var="list_url" value="Action"></c:url>
+																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_addresses" target="content">Address</a>
 																</div>
 												</div>
-												<div class="col-md-9">
+												<div class="col-md-10">
 																<div id="content"></div>
 																<div id="overlay" class="disable">
 																				<div id="dialog" class="reloadable"></div>

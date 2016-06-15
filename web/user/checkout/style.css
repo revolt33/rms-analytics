@@ -1,0 +1,33 @@
+.cross {
+				text-decoration: line-through;
+}
+.push-down {
+				margin-top: 30px;
+}
+.bold {
+				font-weight: bold;
+}
+.icon {
+				cursor: pointer;
+}
+#load-screen {
+				display: none;
+				z-index: 2;
+				position: absolute;
+				top: 45vh;
+				width: 200px;
+				height: 200px;
+				margin-left: 45vw;
+				background: url(../../img/gears.svg);
+}
+#status-bar {
+				position: fixed;
+				bottom: 10vh;
+				display: none;
+				width: 40vw;
+				margin-left: 30vw;
+				z-index: 7;
+}
+.input-sign {
+				margin-right: 55px;
+}

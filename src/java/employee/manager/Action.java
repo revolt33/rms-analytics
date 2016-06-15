@@ -35,21 +35,19 @@ public class Action extends HttpServlet {
 		String param = request.getParameter("param");
 		Connector connector = (Connector) getServletContext().getAttribute("connector");
 		ConnectionToken token = connector.getToken();
-		AuthToken authToken = (AuthToken) request.getSession().getAttribute("auth_token");
+		AuthToken authToken = (AuthToken) request.getSession().getAttribute("employee_auth_token");
 		Connection con = connector.getConnection(token);
 		if ( authToken != null ) {
 			if ( con != null ) {
 				switch (param) {
 					case "view_emp":
 						ArrayList<Employee> empList = Processor.getEmployeeList(authToken, con);
-						connector.closeConnection(token);
 						request.setAttribute("emp_list", empList);
 						RequestDispatcher dispatcher = request.getRequestDispatcher("/employee/manager/resource/view-employee.jsp");
 						dispatcher.forward(request, response);
 						break;
 					case "view_emp_detail":
 						Employee emp = Processor.getEmpDetail(Integer.parseInt(request.getParameter("emp_id")), authToken, con);
-						connector.closeConnection(token);
 						request.setAttribute("emp", emp);
 						dispatcher = request.getRequestDispatcher("/employee/manager/resource/view-employee-detail.jsp");
 						dispatcher.forward(request, response);
@@ -61,6 +59,7 @@ public class Action extends HttpServlet {
 						dispatcher.forward(request, response);
 						break;
 				}
+				connector.closeConnection(token);
 			}
 		}
 	}
@@ -81,7 +80,7 @@ public class Action extends HttpServlet {
 				}
 			}
 			Status result = Status.UNKNOWN;
-			AuthToken authToken = ((AuthToken) request.getSession().getAttribute("auth_token"));
+			AuthToken authToken = ((AuthToken) request.getSession().getAttribute("employee_auth_token"));
 			Connection con = connector.getConnection(token);
 			if (proceed) {
 				if (authToken != null) {
@@ -192,7 +191,6 @@ public class Action extends HttpServlet {
 									for (String id : request.getParameterValues("item_list[]")) {
 										Discount.Item item = discount.new Item();
 										item.setItem(Integer.parseInt(id));
-										item.setType('i');
 										discount.addItem(item);
 									}
 								}

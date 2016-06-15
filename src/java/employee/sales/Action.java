@@ -25,7 +25,7 @@ public class Action extends HttpServlet {
 		String param = request.getParameter("param");
 		Connector connector = (Connector) getServletContext().getAttribute("connector");
 		ConnectionToken token = connector.getToken();
-		AuthToken authToken = (AuthToken) request.getSession().getAttribute("auth_token");
+		AuthToken authToken = (AuthToken) request.getSession().getAttribute("employee_auth_token");
 		Connection con = connector.getConnection(token);
 		if (authToken != null && con != null) {
 			switch (param) {
