@@ -24,7 +24,7 @@ $(document).ready(function () {
 				$(document).on('click', '.load-link-with-param', function () {
 								var link = $(this).attr('href');
 								var param = $(this).attr('param');
-								writeCookie(new Cookie('link_'+page, param, 30));
+								writeCookie(new Cookie('link_'+page, param, 30, document.location.href));
 								param = 'param=' + param;
 								var target = $(this).attr('target');
 								var makeVisible = "";

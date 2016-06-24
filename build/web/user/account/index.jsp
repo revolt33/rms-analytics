@@ -7,6 +7,8 @@
 								<jsp:include page="/resource/include.jsp" />
 								<c:url var="url" value="style.css"></c:url>
 								<link rel="stylesheet" type="text/css" href="${url}" />
+								<c:url var="url" value="/resource/confirmModal.js"></c:url>
+								<script type="text/javascript" src="${url}" defer></script>
 								<c:url var="url" value="script.js"></c:url>
 								<script type="text/javascript" src="${url}" defer></script>
         <title>Account Settings</title>
@@ -32,6 +34,19 @@
 																<div id="overlay" class="disable">
 																				<div id="dialog" class="reloadable"></div>
 																				<div id="load-screen"></div>
+																</div>
+												</div>
+								</div>
+								<div class="modal fade" tabindex="-1" role="dialog" id="modal" data-backdrop="static">
+												<div class="modal-dialog">
+																<div class="modal-content">
+																				<div class="modal-header">
+																								<h4 class="modal-title text-center"></h4>
+																				</div>
+																				<div class="modal-body">
+																				</div>
+																				<div class="modal-footer">
+																				</div>
 																</div>
 												</div>
 								</div>

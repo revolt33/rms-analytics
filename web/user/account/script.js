@@ -28,24 +28,26 @@ $(document).ready(function () {
 																return false;
 												}
 								});
+								if ( $(this).hasClass('has-password') ) {
+												var newPassword = $(this).find('input[name=new]').val();
+												var repeat = $(this).find('input[name=repeat]').val();
+												if (newPassword !== repeat) {
+																errorMessage('Both passwords must be same!');
+																proceed = false;
+												}
+								}
 								if (proceed) {
 												var link = $(this).attr('action');
 												var close = $(this).attr('close');
 												var method = $(this).attr('method');
 												var formData = $(this).serialize();
 												var postTarget = $(this).attr('post-target');
-												if ($(this).hasClass('reduce-popover')) {
-																var group = $(this).attr('group');
-																var code = $(this).attr('code');
-																$('.' + group).each(function () {
-																				if ($(this).attr('group-code') == code) {
-																								$(this).popover('destroy');
-																				}
-																});
+												submitForm(link, formData, close, method, postTarget);
+								} else {
+												if ( !$(this).hasClass('has-password') ) {
+																errorMessage('All fields are required!');
 												}
-												submitForm(link, formData, close, method, postTarget, this);
-								} else
-												errorMessage('All fields are required!');
+								}	
 								event.preventDefault();
 				});
 				$(document).on('click', '.load-button-with-url', function () {
@@ -57,10 +59,30 @@ $(document).ready(function () {
 								var method = 'GET';
 								load(link, param, target, makeVisible, method, "");
 				});
+				$(document).on('click', '.action-button-with-url', function () {
+								var link = $(this).attr('url');
+								var param = $(this).attr('param');
+								var target = $(this).attr('target');
+								var code = $(this).attr('code');
+								var data = 'param=' + param + '&code=' + code;
+								var method = 'POST';
+								var confirmModal = new ConfirmModal("action", {
+												link: link,
+												data: data,
+												target: target,
+												method: method
+								},
+																{
+																				title: $(this).attr('confirm-title'),
+																				body: $(this).attr('confirm-content'),
+																				okay: $(this).attr('confirm-okay')
+																});
+								confirmModal.show();
+				});
 				$(document).on('click', '.load-link-with-param', function () {
 								var link = $(this).attr('href');
 								var param = $(this).attr('param');
-								writeCookie(new Cookie('link_'+page, param, 30));
+								writeCookie(new Cookie('link_' + page, param, 30, document.location.href));
 								param = 'param=' + param;
 								var target = $(this).attr('target');
 								var makeVisible = "";
@@ -91,22 +113,52 @@ window.onload = function () {
 				if (!found)
 								$($('.load-link-with-param')[0]).trigger('click');
 				status_bar = $('#status-bar').clone();
-				$('#status-bar').detach();		
+				$('#status-bar').detach();
 };
-function submitForm(link, data, close, method, postTarget, form) {
+function action(param) {
+				$('#load-screen').fadeIn();
+				$.ajax({
+								url: param['link'],
+								data: param['data'],
+								type: param['method'],
+								success: function (data) {
+												$('#load-screen').fadeOut();
+												var json = $.parseJSON(data);
+												var status = json['status'];
+												var msg = json['message'];
+												if (status == 1) {
+																successMessage(msg);
+																$('.list-group-item').each(function () {
+																				if ($(this).attr('param') === param['target']) {
+																								$(this).trigger('click');
+																								return false;
+																				}
+																});
+												} else {
+																errorMessage(msg);
+												}
+								},
+								error: function () {
+												$('#load-screen').fadeOut();
+												errorMessage('Connection Error!');
+								}
+				});
+}
+function submitForm(link, data, close, method, postTarget) {
+				$('#load-screen').fadeIn();
 				$.ajax({
 								type: method,
 								url: link,
 								data: data,
 								success: function (data) {
+												$('#load-screen').fadeOut();
 												var json = $.parseJSON(data);
 												var status = json['status'];
-												var destruct = true;
 												switch (parseInt(status)) {
 																case 1:
 																				successMessage(json['message']);
 																				$('.list-group-item').each(function () {
-																								if ($(this).attr('param') == postTarget) {
+																								if ($(this).attr('param') === postTarget) {
 																												$(this).trigger('click');
 																												return false;
 																								}
@@ -116,13 +168,12 @@ function submitForm(link, data, close, method, postTarget, form) {
 																				errorMessage(json['message']);
 																				break;
 												}
-												if (destruct) {
-																$('#overlay').find('.reloadable').empty();
-																if (close.length > 0)
-																				$('#' + close).fadeOut(200);
-												}
+												$('#overlay').find('.reloadable').empty();
+												if (close.length > 0)
+																$('#' + close).fadeOut(200);
 								},
 								error: function () {
+												$('#load-screen').fadeOut();
 												errorMessage('Connection Error!');
 								}
 				});

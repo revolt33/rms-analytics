@@ -31,7 +31,7 @@
 																<div class="form-group">
 																				<label class="control-label col-xs-4" for="landmark">Landmark:</label>
 																				<div class="col-xs-8">
-																								<input class="form-control" type="text" name="landmark" maxlength="200" placeholder="Your nearby landmark" required/>
+																								<input class="form-control" type="text" name="landmark" maxlength="200" placeholder="Your nearby landmark"/>
 																				</div>
 																</div>
 																<div class="form-group">

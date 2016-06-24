@@ -73,13 +73,37 @@ public class Processor {
 				} else {
 					return Status.USER_UNAVAILABLE;
 				}
-
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 				return Status.EXCEPTION_OCCURED;
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				return Status.EXCEPTION_OCCURED;
+			}
+		}
+		return Status.SUCCESS;
+	}
+	
+	public static Status changePassword(AuthToken authToken, String old, String password, Connection con) {
+		synchronized ( con ) {
+			try {
+				con.setCatalog("customer");
+				Statement st = con.createStatement();
+				ResultSet rs = st.executeQuery("select password from user where id="+authToken.getId());
+				if ( rs.next() ) {
+					if ( business.hashing.Password.check(old, rs.getString("password")) ) {
+						password = business.hashing.Password.getSaltedHash(password);
+						st.executeUpdate("update user set password='"+password+"' where id="+authToken.getId());
+					} else {
+						return Status.INCORRECT_PASSWORD;
+					}
+				} else {
+					return Status.USER_UNAVAILABLE;
+				}
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			} catch (Exception ex) {
+				ex.printStackTrace();
 			}
 		}
 		return Status.SUCCESS;
@@ -317,5 +341,100 @@ public class Processor {
 			}
 
 		}
+	}
+	
+	public static boolean addAddress(Address address, AuthToken authToken, Connection con) {
+		synchronized ( con ) {
+			try {
+				con.setCatalog("customer");
+				Statement st = con.createStatement();
+				st.executeUpdate("insert into address (user, name, house, street, landmark, city, pin, contact) values("+authToken.getId()+", '"+address.getName()+"', '"+address.getHouse()+"', '"+address.getStreet()+"', '"+address.getLandmark()+"', '"+address.getCity()+"', "+address.getPin()+", "+address.getContact()+")");
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public static ArrayList<Address> getAddressList(AuthToken authToken, Connection con) {
+		ArrayList<Address> list = new ArrayList<>();
+		synchronized ( con ) {
+			try {
+				con.setCatalog("customer");
+				Statement st = con.createStatement();
+				ResultSet rs = st.executeQuery("select * from address where user="+authToken.getId());
+				while ( rs.next() ) {					
+					Address address = new Address();
+					address.setName(rs.getString("name"));
+					address.setHouse(rs.getString("house"));
+					address.setStreet(rs.getString("street"));
+					address.setCity(rs.getString("city"));
+					address.setLandmark(rs.getString("landmark"));
+					address.setPin(rs.getInt("pin"));
+					address.setId(rs.getInt("id"));
+					address.setContact(rs.getLong("contact"));
+					list.add(address);
+				}
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return list;
+	}
+	
+	public static Address getAddress(AuthToken authToken, int id, Connection con) {
+		Address address = new Address();
+		synchronized ( con ) {
+			try {
+				con.setCatalog("customer");
+				Statement st = con.createStatement();
+				ResultSet rs = st.executeQuery("select * from address where id="+id+" and user="+authToken.getId());
+				if ( rs.next() ) {
+					address.setName(rs.getString("name"));
+					address.setHouse(rs.getString("house"));
+					address.setStreet(rs.getString("street"));
+					address.setCity(rs.getString("city"));
+					address.setLandmark(rs.getString("landmark"));
+					address.setPin(rs.getInt("pin"));
+					address.setId(rs.getInt("id"));
+					address.setContact(rs.getLong("contact"));
+				} else {
+					address.setId(0);
+				}
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return address;
+	}
+	
+	public static boolean editAddress(AuthToken authToken, Address address, Connection con) {
+		synchronized ( con ) {
+			try {
+				con.setCatalog("customer");
+				Statement st = con.createStatement();
+				st.executeUpdate("update address set name='"+address.getName()+"', house='"+address.getHouse()+"', street='"+address.getStreet()+"', landmark='"+address.getLandmark()+"', city='"+address.getCity()+"', pin="+address.getPin()+", contact="+address.getContact()+" where id="+address.getId()+" and user="+authToken.getId());
+				return true;
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+			
+		}
+		return false;
+	}
+	
+	public static boolean deleteAddress(AuthToken authToken, int id, Connection con) {
+		synchronized ( con ) {
+			try {
+				con.setCatalog("customer");
+				Statement st = con.createStatement();
+				st.executeUpdate("delete from address where id="+id+" and user="+authToken.getId());
+				return true;
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return false;
 	}
 }

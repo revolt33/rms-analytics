@@ -8,11 +8,11 @@ function writeCookie(cookie) {
 								date.setTime(date.getTime() + days * 86400 * 1000);
 								expires = "; expires=" + date.toGMTString();
 				}
-				document.cookie = name + "=" + value + expires + "; path=/";
+				document.cookie = name + "=" + value + expires + "; path="+cookie.getPath();
 }
 function readCookie(name) {
 				var searchName = name + "=";
-				var value, valid = 0, expires = "expires=";
+				var value, valid = 0;
 				var cookies = document.cookie.split(';');
 				for (var i = 0; i < cookies.length; i++) {
 								var c = cookies[i];
@@ -28,23 +28,30 @@ function readCookie(name) {
 function eraseCookie(name) {
 				writeCookie(new Cookie(name, '', -1));
 }
-function Cookie(name, value, valid) {
+function Cookie(name, value, valid, path) {
 				this.name = name;
 				this.value = value;
 				this.valid = valid;
+				this.path = path;
 }
 Cookie.prototype.getName = function () {
 				return this.name;
-}
+};
 Cookie.prototype.getValue = function () {
 				return this.value;
-}
+};
 Cookie.prototype.getValidity = function () {
 				return this.valid;
-}
+};
+Cookie.prototype.getPath = function () {
+				return this.path;
+};
 Cookie.prototype.setValidity = function (valid) {
-				this.valid = valid;
-}
+		;		this.valid = valid;
+};
 Cookie.prototype.setValue = function (value) {
 				this.value = value;
-}
+};
+Cookie.prototype.setPath = function (path) {
+				this.path = path;
+};

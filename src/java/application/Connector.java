@@ -5,11 +5,11 @@ import java.util.*;
 
 public class Connector {
 
-	private TreeSet<ConnectionToken> connections = new TreeSet<ConnectionToken>();
+	private final TreeSet<ConnectionToken> connections = new TreeSet<>();
 	private long lastAccessed;
 	private int count;
-	private String username;
-	private String password;
+	private final String username;
+	private final String password;
 
 	public Connector(String username, String password) {
 		this.username = username;

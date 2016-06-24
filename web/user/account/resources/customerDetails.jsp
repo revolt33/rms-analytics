@@ -2,7 +2,9 @@
 <div class="content-header bg-info">
 				<h3 class="text-center">User Details</h3>
 				<c:url var="url" value="templates/updateUserDetails.jsp"></c:url>
-				<button type="button" class="btn btn-default load-button-with-url" url="${url}" param="" target="dialog" make-visible="overlay">Update Contact</button>
+				<button class="btn btn-default load-button-with-url" url="${url}" param="" target="dialog" make-visible="overlay">Update Contact</button>
+				<c:url var="url" value="templates/password.jsp"></c:url>
+				<button class="btn btn-default load-button-with-url pull-right" url="${url}" param="" target="dialog" make-visible="overlay" >Change Password</button>
 </div>
 <div>
 				<table class="table table-striped">

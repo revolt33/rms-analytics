@@ -42,7 +42,7 @@ public class Customer extends HttpServlet {
 								response.addCookie(cookie);
 							}
 						}
-						response.sendRedirect(getServletContext().getContextPath()+"/");
+						response.sendRedirect(response.encodeRedirectURL(getServletContext().getContextPath()+"/"));
 						break;
 					case INCORRECT_PASSWORD:
 						response.sendRedirect(response.encodeRedirectURL(getServletContext().getContextPath()+"/?error=user_password"));
