@@ -2,12 +2,13 @@ $(document).ready(function () {
 				$('#coupon').keyup(function () {
 								$(this).val($(this).val().toUpperCase());
 				});
-				$('#browse-coupons').click(function (){
+				$('.load-dialog').click(function (){
 								var link = $(this).attr('url');
+								$('#dialog').find('.modal-title').text($(this).attr('set-title'));
 								$('#load-screen').fadeIn();
 								$.ajax({
 												url: link,
-												type: 'POST',
+												type: 'GET',
 												success: function (data) {
 																$('#dialog').find('.modal-body').html(data);
 																$('#load-screen').fadeOut();
@@ -15,7 +16,7 @@ $(document).ready(function () {
 												},
 												error: function () {
 																$('#load-screen').fadeOut();
-																errorMessage('Connection Error!')
+																errorMessage('Connection Error!');
 												}
 								});
 				});
@@ -23,6 +24,31 @@ $(document).ready(function () {
 								var code = $(this).attr('code');
 								$('#coupon').val(code);
 								$('#dialog').modal('hide');
+				});
+				$(document).on('click', '.deliver', function () {
+								var code = $(this).attr('code');
+								$('#address').val(code);
+								$('#delivery-address').find('.panel-body').html($(this).parent().parent().find('.panel-body').html());
+								$('#dialog').modal('hide');
+								$('#delivery-mode').val('d');
+								$('#address-code').val(code);
+								$('#delivery-address').slideDown();
+				});
+				$('#pickup').click(function () {
+								$('#address').val(0);
+								$('#address-code').val(0);
+								$('#delivery-mode').val('p');
+								$('#delivery-address').slideUp(function () {
+												$('#delivery-address').find('.panel-body').empty();	
+								});
+				});
+				$('#place-order').submit(function (e){
+								if ( $('#home-delivery').is(':checked') ) {
+												if ( parseInt($('#address').val()) === 0 ) {
+																e.preventDefault();
+																errorMessage('Please select a delivery address first.');
+												}
+								}
 				});
 });
 window.onload = function () {
@@ -32,26 +58,3 @@ window.onload = function () {
 				status_bar = $('#status-bar').clone();
 				$('#status-bar').detach();
 };
-function errorMessage(message) {
-				var sign = document.createElement('span');
-				$(sign).addClass('glyphicon glyphicon-remove-sign pull-left');
-				displayMessage('alert-danger', sign, message);
-}
-function successMessage(message) {
-				var sign = document.createElement('span');
-				$(sign).addClass('glyphicon glyphicon-ok-circle pull-left');
-				displayMessage('alert-success', sign, message);
-}
-function displayMessage(alert_class, sign, message) {
-				$('#status-bar').remove();
-				var feedback = status_bar.clone();
-				$('body').append(feedback);
-				feedback.addClass(alert_class);
-				$(feedback).append(sign);
-				var element = document.createElement('span');
-				element.textContent = message;
-				$(feedback).append(element);
-				feedback.fadeIn(500).delay(3000).fadeOut(300, function () {
-								feedback.remove();
-				});
-}

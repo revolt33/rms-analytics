@@ -7,6 +7,7 @@ import business.customer.Address;
 import business.customer.Customer;
 import business.customer.AuthToken;
 import business.customer.Processor;
+import business.sales.Order;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -40,6 +41,19 @@ public class Action extends HttpServlet {
 						ArrayList<Address> list = Processor.getAddressList(authToken, con);
 						request.setAttribute("addresses", list);
 						dispatcher = request.getRequestDispatcher("/user/account/resources/address.jsp");
+						dispatcher.forward(request, response);
+						break;
+					case "view_orders":
+						ArrayList<Order> orderList = Processor.getOrderHistory(authToken, con);
+						request.setAttribute("orders", orderList);
+						dispatcher = request.getRequestDispatcher("/user/account/resources/orders.jsp");
+						dispatcher.forward(request, response);
+						break;
+					case "view_order":
+						int orderId = Integer.parseInt(request.getParameter("order"));
+						Order order = Processor.getOrder(authToken, orderId, con);
+						request.setAttribute("order", order);
+						dispatcher = request.getRequestDispatcher("/user/account/resources/viewOrder.jsp");
 						dispatcher.forward(request, response);
 						break;
 				}

@@ -59,6 +59,18 @@
         <servlet-name>user-coupon</servlet-name>
         <servlet-class>user.Coupon</servlet-class>
     </servlet>
+    <servlet>
+        <servlet-name>user-checkout-address</servlet-name>
+        <servlet-class>user.Address</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>user-checkout-apply-coupon</servlet-name>
+        <servlet-class>user.ApplyCoupon</servlet-class>
+    </servlet>
+    <servlet>
+        <servlet-name>user-checkout-place-order</servlet-name>
+        <servlet-class>user.PlaceOrder</servlet-class>
+    </servlet>
     <servlet-mapping>
         <servlet-name>employee-login</servlet-name>
         <url-pattern>/employee.login</url-pattern>
@@ -169,6 +181,18 @@
     <servlet-mapping>
         <servlet-name>user-coupon</servlet-name>
         <url-pattern>/user/checkout/coupon</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>user-checkout-address</servlet-name>
+        <url-pattern>/user/checkout/address</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>user-checkout-apply-coupon</servlet-name>
+        <url-pattern>/user/checkout/applyCoupon</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>user-checkout-place-order</servlet-name>
+        <url-pattern>/user/checkout/placeOrder</url-pattern>
     </servlet-mapping>
     <session-config>
         <session-timeout>125</session-timeout>

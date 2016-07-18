@@ -2,6 +2,7 @@ package user;
 
 import application.ConnectionToken;
 import application.Connector;
+import business.Status;
 import business.customer.Cart;
 import business.customer.CartItem;
 import business.customer.AuthToken;
@@ -35,8 +36,7 @@ public class Checkout extends HttpServlet {
 					item.setQuantity(Integer.parseInt(parts[1]));
 					list.add(item);
 				}
-				String coupon = request.getParameter("coupon");
-				Cart cart = Processor.checkout(list, coupon, con);
+				Cart cart = Processor.checkout(authToken, list, null, Status.UNKNOWN, 0, con);
 				request.setAttribute("cart", cart);
 				RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
 				dispatcher.forward(request, response);

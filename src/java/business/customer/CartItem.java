@@ -8,6 +8,7 @@ public class CartItem {
 	private boolean valid = true;
 	private String name;
 	private boolean available = true;
+	private int priceId;
 
 	public int getUnit() {
 		return unit;
@@ -63,5 +64,13 @@ public class CartItem {
 
 	public void setItem(int item) {
 		this.item = item;
+	}
+
+	public int getPriceId() {
+		return priceId;
+	}
+
+	public void setPriceId(int priceId) {
+		this.priceId = priceId;
 	}
 }

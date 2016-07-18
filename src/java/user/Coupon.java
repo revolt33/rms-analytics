@@ -5,7 +5,6 @@ import application.Connector;
 import business.customer.AuthToken;
 import business.customer.Processor;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.util.ArrayList;
 import javax.servlet.RequestDispatcher;
@@ -17,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 public class Coupon extends HttpServlet {
 
 	@Override
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		AuthToken authToken = (AuthToken) request.getSession().getAttribute("customer_auth_token");
 		Connector connector = (Connector) getServletContext().getAttribute("connector");
 		ConnectionToken token = connector.getToken();

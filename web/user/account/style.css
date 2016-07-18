@@ -58,7 +58,6 @@
 #status-bar {
 				position: fixed;
 				bottom: 10vh;
-				display: none;
 				width: 40vw;
 				margin-left: 30vw;
 				z-index: 7;

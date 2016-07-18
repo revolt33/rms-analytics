@@ -21,8 +21,12 @@
 				<head>
 								<title>Home</title>
 								<jsp:include page="/resource/include.jsp" />
-								<script type="text/javascript" src="js/script.js" defer></script>
-								<link rel="stylesheet" type="text/css" href="css/style.css">
+								<c:url value="/resource/message.js" var="url" ></c:url>
+								<script type="text/javascript" src="${url}" defer></script>
+								<c:url value="/js/script.js" var="url" ></c:url>
+								<script type="text/javascript" src="${url}" defer></script>
+								<c:url value="/css/style.css" var="url" ></c:url>
+								<link rel="stylesheet" type="text/css" href="${url}">
 				</head>
 				<body>
 								<nav>

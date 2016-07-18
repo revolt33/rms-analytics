@@ -96,4 +96,48 @@ public class Processor {
 		}
 		return list;
 	}
+	
+	public static boolean placeOrder(Order order, Connection con) {
+		synchronized ( con ) {
+			Statement st = null;
+			try {
+				con.setCatalog("sales");
+				st = con.createStatement();
+				st.execute("start transaction");
+				switch ( order.getMode() ) {
+					case CUSTOMER:
+						st.executeUpdate("insert into bill (value, effective_value, customer, customer_name, contact, mode, delivery_mode, address, "+ (order.isCouponApplied()?"discount_code,":"") +" timestamp, status, payment_status) values("+order.getValue()+", "+order.getEffectiveValue()+", "+order.getCustomer()+", '"+order.getCustomerName()+"', "+order.getContact()+", 'c', '"+order.getDeliveryMode().getStatus()+"', '"+order.getAddress()+"', "+ (order.isCouponApplied()?("'"+order.getDiscount()+"',"):"")+ +order.getTimestamp()+", '"+order.getOrderSatatus().getStatus()+"', '"+order.getPaymentStatus().getStatus()+"')");
+						addBillInfo(st, order);
+						break;
+					case SALES_EMPLOYEE:
+						st.executeUpdate("insert into bill (value, effective_value, customer, customer_name, contact, employee, mode, delivery, address, "+ (order.isCouponApplied()?"discount_code,":"") +" timestamp, status, payment_status) values("+order.getValue()+", "+order.getEffectiveValue()+", "+order.getCustomer()+", '"+order.getCustomerName()+"', "+order.getContact()+", "+order.getEmployee()+", 'c', '"+order.getDeliveryMode().getStatus()+"', '"+order.getAddress()+"', "+ (order.isCouponApplied()?("'"+order.getDiscount()+"',"):"")+order.getTimestamp()+", '"+order.getOrderSatatus().getStatus()+"', '"+order.getPaymentStatus().getStatus()+"')");
+						addBillInfo(st, order);
+						break;
+				}
+				st.execute("commit");
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+				try {
+					st.execute("rollback");
+				} catch (SQLException ex1) {
+					ex1.printStackTrace();
+					return false;
+				}
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private static void addBillInfo(Statement st, Order order) throws SQLException {
+		ArrayList<Order.Info> list = order.getInfo();
+		ResultSet rs = st.executeQuery("SELECT LAST_INSERT_ID()");
+		int id = 0;
+		if ( rs.next() )
+			id = rs.getInt(1);
+		for ( Order.Info info: list ) {
+			st.addBatch("insert into bill_info (id, price, quantity) values("+id+", "+info.getPriceId()+", "+info.getQuantity()+")");
+		}
+		st.executeBatch();
+	}
 }

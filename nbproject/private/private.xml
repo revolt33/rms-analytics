@@ -3,13 +3,14 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/src/java/business/customer/Processor.java</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/src/java/business/sales/Processor.java</file>
             <file>file:/E:/study/javaex/NetBeans/finalProject/web/user/account/script.js</file>
-            <file>file:/E:/study/javaex/NetBeans/finalProject/web/user/account/resources/address.jsp</file>
-            <file>file:/E:/study/javaex/NetBeans/finalProject/src/java/business/customer/Address.java</file>
-            <file>file:/E:/study/javaex/NetBeans/finalProject/web/user/account/templates/addAddress.jsp</file>
-            <file>file:/E:/study/javaex/NetBeans/finalProject/web/user/account/index.jsp</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/web/user/account/style.css</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/web/user/account/resources/orders.jsp</file>
             <file>file:/E:/study/javaex/NetBeans/finalProject/src/java/user/Action.java</file>
-            <file>file:/E:/study/javaex/NetBeans/finalProject/web/user/account/resources/customerDetails.jsp</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/src/java/business/sales/Order.java</file>
+            <file>file:/E:/study/javaex/NetBeans/finalProject/web/user/account/index.jsp</file>
         </group>
     </open-files>
 </project-private>

@@ -1,10 +1,17 @@
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%
+				if ( request.getParameter("view_tab") != null ) {
+								response.addCookie(new Cookie("link_user", request.getParameter("view_tab")));
+				}
+%>
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 								<jsp:include page="/resource/include.jsp" />
+								<c:url var="url" value="/resource/message.js"></c:url>
+								<script type="text/javascript" src="${url}" defer></script>
 								<c:url var="url" value="style.css"></c:url>
 								<link rel="stylesheet" type="text/css" href="${url}" />
 								<c:url var="url" value="/resource/confirmModal.js"></c:url>
@@ -25,8 +32,8 @@
 																				<div class="list-group">
 																				<c:url var="list_url" value="Action"></c:url>
 																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_user_details" target="content">Your Info</a>
-																				<c:url var="list_url" value="Action"></c:url>
 																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_addresses" target="content">Address</a>
+																				<a href="${list_url}" class="list-group-item load-link-with-param" param="view_orders" target="content">Orders</a>
 																</div>
 												</div>
 												<div class="col-md-10">

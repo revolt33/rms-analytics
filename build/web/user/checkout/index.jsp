@@ -6,6 +6,8 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
         <title>Checkout</title>
 								<jsp:include page="/resource/include.jsp" />
+								<c:url var="url" value="/resource/message.js"></c:url>
+								<script type="text/javascript" src="${url}" defer></script>
 								<c:url var="url" value="/user/checkout/script.js"></c:url>
 								<script type="text/javascript" src="${url}" defer></script>
 								<c:url var="url" value="/user/checkout/style.css"></c:url>
@@ -14,15 +16,15 @@
     <body>
         <jsp:include page="/user/templates/header.jsp" />
 								<div id="load-screen"></div>
-								<div id="status-bar" class="alert fade in text-center">
-												<a href="#" class="close status-close" data-dismiss="alert" area-label="close">&times;</a><span></span>
+								<div id="status-bar" class="alert alert-danger fade in text-center">
+												<a href="#" class="close status-close" data-dismiss="alert" area-label="close">&times;</a><span>Please enable javascript for this website to function properly.</span>
 								</div>
 								<div class="modal fade" tabindex="-1" role="dialog" id="dialog">
 												<div class="modal-dialog">
 																<div class="modal-content">
 																				<div class="modal-header">
 																								<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-																								<h4 class="modal-title text-center">Discount Coupons</h4>
+																								<h4 class="modal-title text-center"></h4>
 																				</div>
 																				<div class="modal-body">
 
@@ -77,11 +79,13 @@
 																												</c:if>
 																								</div>
 																								<div class="panel-footer">
-																												<c:url value="/user/checkout/" var="url"></c:url>
+																												<c:url value="/user/checkout/applyCoupon" var="url"></c:url>
 																												<form class="form-inline" method="POST" action="${url}">
 																																<c:forEach var="item" items="${requestScope.cart.list}">
 																																				<input type="hidden" name="unit[]" value="${item.unit},${item.quantity}" />
 																																</c:forEach>
+																																<input type="hidden" name="delivery-mode" value="${requestScope.cart.deliveryMode}" id="delivery-mode" />
+																																<input type="hidden" name="address" value="${requestScope.cart.address.id}" id="address-code" />
 																																<c:set var="form_class" value="" scope="page"></c:set>
 																																<c:if test="${requestScope.cart.couponApplied}">
 																																				<c:if test="${requestScope.cart.couponValid}">
@@ -98,7 +102,7 @@
 																																												<div class="input-group">
 																																																<input class="form-control text-uppercase" id="coupon" type="text" maxlength="7" placeholder="Coupon Code" name="coupon" ${requestScope.cart.couponApplied?'aria-describedby="coupon_status"':''} value="${requestScope.cart.coupon}" required/>
 																																																<c:url var="url" value="coupon"></c:url>
-																																																<span class="input-group-addon icon" data-toggle="tooltip" title="Browse Coupons" data-container="body" id="browse-coupons" url="${url}">
+																																																<span class="input-group-addon icon load-dialog" data-toggle="tooltip" title="Browse Coupons" data-container="body" set-title="Discount Coupons" url="${url}">
 																																																				<span class="glyphicon glyphicon-globe" ></span>
 																																																</span>
 																																												</div>
@@ -137,14 +141,14 @@
 																																<div class="form-group">
 																																				<label class="col-xs-8 control-label">Total Amount${requestScope.cart.couponValid?'':' Payable'}:</label>
 																																				<div class="col-xs-4">
-																																								<p class="form-control-static text-success bold">${requestScope.cart.total} INR</p>
+																																								<p class="form-control-static text-success bold">${requestScope.cart.formattedTotal} INR</p>
 																																				</div>
 																																</div>
 																																<c:if test="${requestScope.cart.couponValid}">
 																																				<div class="form-group">
 																																								<label class="col-xs-8 control-label">Discount:</label>
 																																								<div class="col-xs-4">
-																																												<p class="form-control-static text-warning bold">${requestScope.cart.total-requestScope.cart.effectiveValue} INR</p>
+																																												<p class="form-control-static text-warning bold">${requestScope.cart.discount} INR</p>
 																																								</div>
 																																				</div>
 																																				<div class="form-group">
@@ -155,17 +159,40 @@
 																																				</div>
 																																</c:if>
 																												</form>
-																												<form class="form-horizontal" method="POST" action="">
+																												<c:url value="placeOrder" var="url"></c:url>
+																												<form class="form-horizontal" method="POST" action="${url}" id="place-order">
 																																<c:forEach var="item" items="${requestScope.cart.list}">
 																																				<input type="hidden" name="unit[]" value="${item.unit},${item.quantity}" />
 																																</c:forEach>
 																																<input type="hidden" name="coupon" value="${requestScope.cart.coupon}" />
+																																<input type="hidden" name="address" value="${requestScope.cart.address.id}" id="address" />
 																																<div class="form-group">
 																																				<div class="col-xs-12 bold text-center">Delivery Type</div>
 																																				<div class="col-xs-12 text-center">
 																																								<div class="radio">
-																																												<label class="radio-inline"><input type="radio" name="delivery" value="p" />Pickup</label>
-																																												<label class="radio-inline"><input type="radio" name="delivery" value="h" />Home Delivery</label>
+																																												<label class="radio-inline"><input type="radio" name="delivery" value="p" id="pickup" required ${requestScope.cart.havingPickup?'checked':''}/>Pickup</label>
+																																																<c:url value="address" var="url"></c:url>
+																																												<label class="radio-inline"><input type="radio" name="delivery" value="d" class="load-dialog" set-title="Select delivery address" url="${url}" id="home-delivery" required ${requestScope.cart.havingAddress?'checked':''}/>Home Delivery</label>
+																																								</div>
+																																				</div>
+																																</div>
+																																<div class="col-xs-12 ${requestScope.cart.havingAddress?'':'collapse'}" id="delivery-address">
+																																				<div class="panel panel-default">
+																																								<div class="panel-heading text-center">Delivery Address</div>
+																																								<div class="panel-body">
+																																												<c:if test="${requestScope.cart.havingAddress}">
+																																																${requestScope.cart.address.name}
+																																																<br />
+																																																${requestScope.cart.address.address}
+																																																<br />
+																																																<c:if test="${requestScope.cart.address.havingLandmark}">
+																																																				Landmark: ${requestScope.cart.address.landmark}
+																																																				<br />
+																																																</c:if>
+																																																PINCODE: ${requestScope.cart.address.pin}
+																																																<br />
+																																																Contact: ${requestScope.cart.address.contact}
+																																												</c:if>
 																																								</div>
 																																				</div>
 																																</div>

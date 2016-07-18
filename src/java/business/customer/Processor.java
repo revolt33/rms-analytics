@@ -2,6 +2,7 @@ package business.customer;
 
 import business.Status;
 import business.Utility;
+import business.sales.Order;
 import business.stock.Result;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -83,17 +84,17 @@ public class Processor {
 		}
 		return Status.SUCCESS;
 	}
-	
+
 	public static Status changePassword(AuthToken authToken, String old, String password, Connection con) {
-		synchronized ( con ) {
+		synchronized (con) {
 			try {
 				con.setCatalog("customer");
 				Statement st = con.createStatement();
-				ResultSet rs = st.executeQuery("select password from user where id="+authToken.getId());
-				if ( rs.next() ) {
-					if ( business.hashing.Password.check(old, rs.getString("password")) ) {
+				ResultSet rs = st.executeQuery("select password from user where id=" + authToken.getId());
+				if (rs.next()) {
+					if (business.hashing.Password.check(old, rs.getString("password"))) {
 						password = business.hashing.Password.getSaltedHash(password);
-						st.executeUpdate("update user set password='"+password+"' where id="+authToken.getId());
+						st.executeUpdate("update user set password='" + password + "' where id=" + authToken.getId());
 					} else {
 						return Status.INCORRECT_PASSWORD;
 					}
@@ -185,13 +186,12 @@ public class Processor {
 		return false;
 	}
 
-	public static Cart checkout(ArrayList<CartItem> list, String coupon, Connection con) {
+	public static Cart checkout(AuthToken authToken, ArrayList<CartItem> list, String coupon, Status mode, int address_code, Connection con) {
 		Cart cart = new Cart();
 		synchronized (con) {
 			try {
 				con.setCatalog("stock");
-				PreparedStatement ps = con.prepareStatement("select * from item join item_config on item=item.id where item_config.id=?");
-				PreparedStatement ps1 = con.prepareStatement("select max(value) as price from price where id=?");
+				PreparedStatement ps = con.prepareStatement("select * from item join item_config join price on item=item.id and item_config.price=price.serial where item_config.id=?");
 				for (CartItem item : list) {
 					ps.setInt(1, item.getUnit());
 					ResultSet rs = ps.executeQuery();
@@ -209,13 +209,8 @@ public class Processor {
 							item.setName(rs.getString("item.name") + " (" + rs.getString("item_config.name") + ")");
 						}
 						item.setItem(rs.getInt("item.id"));
-						ps1.setInt(1, item.getUnit());
-						rs = ps1.executeQuery();
-						if (rs.next()) {
-							item.setPrice(Float.parseFloat(rs.getString("price")));
-						} else {
-							item.setValid(false);
-						}
+						item.setPrice(rs.getFloat("price.value"));
+						item.setPriceId(rs.getInt("price.serial"));
 						cart.addCartItem(item);
 					}
 				}
@@ -226,6 +221,7 @@ public class Processor {
 					Statement st = con.createStatement();
 					ResultSet rs = st.executeQuery("select * from discount where code='" + coupon + "'");
 					if (rs.next()) {
+						cart.setDiscountId(rs.getInt("id"));
 						float max = rs.getFloat("max");
 						float discount = rs.getFloat("percentage") / 100;
 						float off = 0f;
@@ -241,7 +237,7 @@ public class Processor {
 									if (item.isAvailable() && item.isValid()) {
 										if (id == item.getItem()) {
 											temp = item.getPrice() * item.getQuantity() * discount;
-											if ( (temp + off) >= max) {
+											if ((temp + off) >= max) {
 												off = max;
 												break label;
 											} else {
@@ -252,13 +248,26 @@ public class Processor {
 								}
 							}
 						} else if (type == Status.All_ITEMS) {
-							off = cart.getTotal()*discount;
-							if ( off > max ) {
+							off = cart.getTotal() * discount;
+							if (off > max) {
 								off = max;
 							}
 						}
-						cart.setEffectiveValue(cart.getTotal()-off);
+						cart.setEffectiveValue(cart.getTotal() - off);
+						cart.setDiscount(off);
 					}
+				}
+				switch (mode) {
+					case DELIVERY:
+						Address address = getAddress(authToken, address_code, con);
+						if (address.getId() != 0) {
+							cart.setHavingAddress(true);
+							cart.setAddress(address);
+						}
+						break;
+					case PICKUP:
+						cart.setHavingPickup(true);
+						break;
 				}
 			} catch (SQLException ex) {
 				ex.printStackTrace();
@@ -266,6 +275,56 @@ public class Processor {
 			}
 		}
 		return cart;
+	}
+
+	public static boolean placeOrder(AuthToken authToken, ArrayList<CartItem> list, String coupon, Status mode, int address_code, Connection con) {
+		Cart cart = checkout(authToken, list, coupon, mode, address_code, con);
+		if (cart.getSize() > 0) {
+			Order order = new Order();
+			order.setValue(cart.getTotal());
+			if (cart.isCouponValid()) {
+				order.setEffectiveValue(cart.getEffectiveValue());
+				order.setCouponApplied(true);
+			} else {
+				order.setEffectiveValue(cart.getTotal());
+			}
+			order.setDeliveryMode(mode);
+			order.setCustomer(authToken.getId());
+			order.setDiscountCode(cart.getCoupon());
+			if ( null != mode) switch (mode) {
+				case DELIVERY:
+					order.setCustomerName(cart.getAddress().getName());
+					order.setAddress(cart.getAddress().getAddress() + " - " + cart.getAddress().getPin() + " Near: "+cart.getAddress().getLandmark());
+					order.setContact(cart.getAddress().getContact());
+					if ( address_code == 0 )
+						return false;
+					break;
+				case PICKUP:
+					order.setCustomerName(authToken.getName());
+					order.setContact(getUserDetail(authToken, con).getContact());
+					break;
+				default:
+					return false;
+			}
+			order.setDeliveryMode(mode);
+			order.setMode(Status.CUSTOMER);
+			order.setPaymentStatus(Status.AWAITED);
+			if ( cart.isCouponValid() ) {
+				order.setCouponApplied(true);
+				order.setDiscount(cart.getDiscountId());
+			}
+			order.setTimestamp(application.Utility.getTimestamp());
+			order.setOrderSatatus(Status.PENDING);
+			for (CartItem item : cart.getList()) {
+				Order.Info info = order.new Info();
+				info.setPriceId(item.getPriceId());
+				info.setQuantity(item.getQuantity());
+				order.addInfo(info);
+			}
+			return business.sales.Processor.placeOrder(order, con);
+		} else {
+			return false;
+		}
 	}
 
 	public static boolean authorize(AuthToken authToken, boolean remember, Connection con) {
@@ -342,13 +401,13 @@ public class Processor {
 
 		}
 	}
-	
+
 	public static boolean addAddress(Address address, AuthToken authToken, Connection con) {
-		synchronized ( con ) {
+		synchronized (con) {
 			try {
 				con.setCatalog("customer");
 				Statement st = con.createStatement();
-				st.executeUpdate("insert into address (user, name, house, street, landmark, city, pin, contact) values("+authToken.getId()+", '"+address.getName()+"', '"+address.getHouse()+"', '"+address.getStreet()+"', '"+address.getLandmark()+"', '"+address.getCity()+"', "+address.getPin()+", "+address.getContact()+")");
+				st.executeUpdate("insert into address (user, name, house, street, landmark, city, pin, contact) values(" + authToken.getId() + ", '" + address.getName() + "', '" + address.getHouse() + "', '" + address.getStreet() + "', '" + address.getLandmark() + "', '" + address.getCity() + "', " + address.getPin() + ", " + address.getContact() + ")");
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 				return false;
@@ -356,15 +415,15 @@ public class Processor {
 		}
 		return true;
 	}
-	
+
 	public static ArrayList<Address> getAddressList(AuthToken authToken, Connection con) {
 		ArrayList<Address> list = new ArrayList<>();
-		synchronized ( con ) {
+		synchronized (con) {
 			try {
 				con.setCatalog("customer");
 				Statement st = con.createStatement();
-				ResultSet rs = st.executeQuery("select * from address where user="+authToken.getId());
-				while ( rs.next() ) {					
+				ResultSet rs = st.executeQuery("select * from address where user=" + authToken.getId());
+				while (rs.next()) {
 					Address address = new Address();
 					address.setName(rs.getString("name"));
 					address.setHouse(rs.getString("house"));
@@ -382,15 +441,15 @@ public class Processor {
 		}
 		return list;
 	}
-	
+
 	public static Address getAddress(AuthToken authToken, int id, Connection con) {
 		Address address = new Address();
-		synchronized ( con ) {
+		synchronized (con) {
 			try {
 				con.setCatalog("customer");
 				Statement st = con.createStatement();
-				ResultSet rs = st.executeQuery("select * from address where id="+id+" and user="+authToken.getId());
-				if ( rs.next() ) {
+				ResultSet rs = st.executeQuery("select * from address where id=" + id + " and user=" + authToken.getId());
+				if (rs.next()) {
 					address.setName(rs.getString("name"));
 					address.setHouse(rs.getString("house"));
 					address.setStreet(rs.getString("street"));
@@ -408,33 +467,98 @@ public class Processor {
 		}
 		return address;
 	}
-	
+
 	public static boolean editAddress(AuthToken authToken, Address address, Connection con) {
-		synchronized ( con ) {
+		synchronized (con) {
 			try {
 				con.setCatalog("customer");
 				Statement st = con.createStatement();
-				st.executeUpdate("update address set name='"+address.getName()+"', house='"+address.getHouse()+"', street='"+address.getStreet()+"', landmark='"+address.getLandmark()+"', city='"+address.getCity()+"', pin="+address.getPin()+", contact="+address.getContact()+" where id="+address.getId()+" and user="+authToken.getId());
+				st.executeUpdate("update address set name='" + address.getName() + "', house='" + address.getHouse() + "', street='" + address.getStreet() + "', landmark='" + address.getLandmark() + "', city='" + address.getCity() + "', pin=" + address.getPin() + ", contact=" + address.getContact() + " where id=" + address.getId() + " and user=" + authToken.getId());
 				return true;
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 			}
-			
+
 		}
 		return false;
 	}
-	
+
 	public static boolean deleteAddress(AuthToken authToken, int id, Connection con) {
-		synchronized ( con ) {
+		synchronized (con) {
 			try {
 				con.setCatalog("customer");
 				Statement st = con.createStatement();
-				st.executeUpdate("delete from address where id="+id+" and user="+authToken.getId());
+				st.executeUpdate("delete from address where id=" + id + " and user=" + authToken.getId());
 				return true;
 			} catch (SQLException ex) {
 				ex.printStackTrace();
 			}
 		}
 		return false;
+	}
+
+	public static ArrayList<Order> getOrderHistory(AuthToken authToken, Connection con) {
+		ArrayList<Order> list = new ArrayList<>();
+		synchronized (con) {
+			try {
+				con.setCatalog("sales");
+				Statement st = con.createStatement();
+				ResultSet rs = st.executeQuery("select * from bill left outer join discount on bill.discount_code=discount.id where customer=" + authToken.getId() + " order by timestamp desc LIMIT 10");
+				while (rs.next()) {
+					Order order = new Order();
+					order.setId(rs.getInt("bill.id"));
+					order.setValue(rs.getFloat("value"));
+					order.setEffectiveValue(rs.getFloat("effective_value"));
+					order.setAddress(rs.getString("address"));
+					order.setDeliveryMode(Status.parseDeliveryMode(rs.getString("delivery_mode").charAt(0)));
+					order.setDiscountCode(rs.getString("code"));
+					order.setCustomerName(rs.getString("customer_name"));
+					order.setOrderSatatus(Status.parseOrderAttendanceStatus(rs.getString("bill.status").charAt(0)));
+					order.setTimestamp(rs.getLong("timestamp"));
+					order.setContact(rs.getLong("contact"));
+					order.setEstimatedDelivery(rs.getInt("estimated_time"));
+					list.add(order);
+				}
+			} catch (SQLException ex) {
+				list.clear();
+				ex.printStackTrace();
+			}
+
+		}
+		return list;
+	}
+	
+	public static Order getOrder(AuthToken authToken, int id, Connection con) {
+		Order order = new Order();
+		synchronized ( con ) {
+			try {
+				con.setCatalog("sales");
+				Statement st = con.createStatement();
+				ResultSet rs = st.executeQuery("select * from bill left outer join discount on discount_code=discount.id where bill.id="+id+" and customer="+authToken.getId());
+				if ( rs.next() ) {
+					order.setAddress(rs.getString("address"));
+					order.setContact(rs.getLong("contact"));
+					order.setCustomerName(rs.getString("customer_name"));
+					order.setDiscountCode(rs.getString("code"));
+					order.setValue(rs.getFloat("value"));
+					order.setEffectiveValue(rs.getFloat("effective_value"));
+					order.setTimestamp(rs.getLong("timestamp"));
+					order.setDeliveryMode(Status.parseDeliveryMode(rs.getString("delivery_mode").charAt(0)));
+					order.setOrderSatatus(Status.parseOrderAttendanceStatus(rs.getString("bill.status").charAt(0)));
+					order.setEstimatedDelivery(rs.getLong("estimated_time"));
+					rs = st.executeQuery("select bill_info.quantity, price.value, item_config.name, item_config.type, item.name from bill_info join stock.price as price natural join stock.item_config as item_config join stock.item as item on bill_info.price=price.serial and item_config.item=item.id where bill_info.id="+id);
+					while ( rs.next() ) {
+						Order.Info info = order.new Info();
+						info.setQuantity(rs.getInt("quantity"));
+						info.setPrice(rs.getFloat("value"));
+						info.setName(rs.getString("item.name")+(rs.getString("type").equals("o")?(" ("+rs.getString("item_config.name")+")"):""));
+						order.addInfo(info);
+					}
+				}
+			} catch (SQLException ex) {
+				ex.printStackTrace();
+			}
+		}
+		return order;
 	}
 }

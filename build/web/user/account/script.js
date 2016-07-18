@@ -20,6 +20,9 @@ $(document).ready(function () {
 				$('#scroll-top span').click(function () {
 								$('html, body').stop().animate({scrollTop: 0}, '400', 'swing');
 				});
+				$("body").tooltip({
+								selector: '[data-toggle="tooltip"]'
+				});
 				$(document).on('submit', 'form', function (event) {
 								var proceed = true;
 								$(this).find('input[type=text], textarea').each(function () {
@@ -188,6 +191,7 @@ function load(link, param, target, makeVisible, method, loadScreen) {
 				if (loadScreen.length > 0) {
 								$('#' + loadScreen).fadeIn(300);
 				}
+				$('#'+ target).empty();
 				$.ajax({
 								type: method,
 								url: link,
@@ -210,28 +214,5 @@ function load(link, param, target, makeVisible, method, loadScreen) {
 																$('#' + loadScreen).fadeOut(300);
 												}
 								}
-				});
-}
-function errorMessage(message) {
-				var sign = document.createElement('span');
-				$(sign).addClass('glyphicon glyphicon-remove-sign pull-left');
-				displayMessage('alert-danger', sign, message);
-}
-function successMessage(message) {
-				var sign = document.createElement('span');
-				$(sign).addClass('glyphicon glyphicon-ok-circle pull-left');
-				displayMessage('alert-success', sign, message);
-}
-function displayMessage(alert_class, sign, message) {
-				$('#status-bar').remove();
-				var feedback = status_bar.clone();
-				$('body').append(feedback);
-				feedback.addClass(alert_class);
-				$(feedback).append(sign);
-				var element = document.createElement('span');
-				element.textContent = message;
-				$(feedback).append(element);
-				feedback.fadeIn(500).delay(3000).fadeOut(300, function () {
-								feedback.remove();
 				});
 }

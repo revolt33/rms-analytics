@@ -1,9 +1,12 @@
 package application;
 
+import java.math.RoundingMode;
 import java.text.DateFormat;
+import java.text.NumberFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class Utility {
@@ -42,5 +45,19 @@ public class Utility {
 	
 	public static boolean isSuitableExtension(String type) {
 		return (type.equals("image/png") || type.equals("image/jpg") || type.equals("image/jpeg"));
+	}
+	
+	public static float getFormattedFloat(float value, int min, int max) {
+		NumberFormat formatter = NumberFormat.getInstance(Locale.US);
+		formatter.setMaximumFractionDigits(max);
+		formatter.setMinimumFractionDigits(min);
+		formatter.setRoundingMode(RoundingMode.HALF_UP);
+		return Float.parseFloat(formatter.format(value));
+	}
+	
+	public static long getTimestamp() {
+		Calendar timestamp = Calendar.getInstance();
+		timestamp.setTimeZone(TimeZone.getTimeZone("GMT+5:30"));
+		return timestamp.getTimeInMillis();
 	}
 }

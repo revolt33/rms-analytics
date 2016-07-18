@@ -15,20 +15,17 @@ public class Connector {
 		this.username = username;
 		this.password = password;
 	}
+
 	public synchronized ConnectionToken getToken() {
 		ConnectionToken token = null;
-		if ( connections.size() > 0 && connections.first().getCount() == 0 ) {
-			token = connections.first();
-		} else {
-			try {
-				Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/?user="+username+"&password="+password);
-				count++;
-				token = new ConnectionToken(con, count, lastAccessed);
-			} catch (SQLException e) {
-				e.printStackTrace();
-				if ( connections.size() > 0 ) {
-					token = connections.first();
-				}
+		try {
+			Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3306/?user=" + username + "&password=" + password);
+			count++;
+			token = new ConnectionToken(con, count, lastAccessed);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			if (connections.size() > 0) {
+				token = connections.first();
 			}
 		}
 		return token;
@@ -46,11 +43,11 @@ public class Connector {
 		int count = -1;
 		synchronized (this) {
 			count = token.closeConnection();
-			if ( count == 0 ) {
+			if (count == 0) {
 				connections.remove(token);
 			}
 		}
-		return count>=0?true:false;
+		return count >= 0;
 	}
 
 	protected void closeAll() {

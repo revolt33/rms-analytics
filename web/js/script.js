@@ -1,5 +1,3 @@
-/* global status_bar */
-
 $(document).ready(function () {
 				$("#login-signup").click(function () {
 								$("#overlay").removeClass("hidden").fadeIn(400);
@@ -64,9 +62,7 @@ $(document).ready(function () {
 								}
 								refreshCart(parseInt(code), 1);
 								var amount = parseFloat($('#total').attr('price'));
-								$('#total').text('Total: ' + (amount + total) + ' INR');
-								$('#total').attr('price', (amount + total));
-								$('#checkout button').css({'cursor': 'pointer'});
+								refreshForm(amount + total);
 				});
 				$(document).on('click', '.remove-cart-item', function () {
 								var quantity = parseInt($(this).parent().attr('quantity'));
@@ -74,14 +70,8 @@ $(document).ready(function () {
 								$(this).parent().slideUp(300, function () {
 												var amount = quantity * price;
 												var total = parseFloat($('#total').attr('price'));
-												$('#total').attr('price', (total - amount));
-												$('#total').text('Total: ' + (total - amount) + ' INR');
+												refreshForm(total - amount);
 												$(this).remove();
-												if ($('.cart-item').length > 0) {
-																$('#checkout button').css({'cursor': 'pointer'});
-												} else {
-																$('#checkout button').css({'cursor': 'not-allowed'});
-												}
 								});
 								refreshCart(parseInt($(this).parent().attr('code')), 0);
 				});
@@ -98,34 +88,19 @@ $(document).ready(function () {
 												$(this).parent().attr('quantity', --quantity);
 												$(this).parent().children('.cart-item-price').text('Cost: ' + quantity + ' x ' + price + ' = ' + (quantity * price) + ' INR');
 												var total = parseFloat($('#total').attr('price'));
-												$('#total').attr('price', (total - price));
-												$('#total').text('Total: ' + (total - price) + ' INR');
+												refreshForm(total - price);
 								} else {
 												$(this).parent().slideUp(300, function () {
 																var amount = quantity * price;
 																var total = parseFloat($('#total').attr('price'));
-																$('#total').attr('price', (total - amount));
-																$('#total').text('Total: ' + (total - amount) + ' INR');
+																refreshForm(total - amount);
 																$(this).remove();
-																if ($('.cart-item').length > 0) {
-																				$('#checkout button').css({'cursor': 'pointer'});
-																} else {
-																				$('#checkout button').css({'cursor': 'not-allowed'});
-																}
 												});
 								}
 								refreshCart(parseInt($(this).parent().attr('code')), -1);
 				});
 				$('#checkout').submit(function (e) {
-								if (parseFloat($('#total').attr('price')) > 0) {
-												$(this).find('input').remove();
-												var form = this;
-												$('.cart-item').each(function () {
-																var element = document.createElement('input');
-																$(element).attr('type', 'hidden').attr('name', 'unit[]').attr('value', ('' + $(this).attr('code') + ',' + $(this).attr('quantity')));
-																$(form).append(element);
-												});
-								} else {
+								if (parseFloat($('#total').attr('price')) <= 0) {
 												e.preventDefault();
 								}
 				});
@@ -170,13 +145,7 @@ window.onload = function () {
 																				total += quantity * price;
 																}
 												}
-												$('#total').attr('price', (total));
-												$('#total').text('Total: ' + (total) + ' INR');
-												if ($('.cart-item').length > 0) {
-																$('#checkout button').css({'cursor': 'pointer'});
-												} else {
-																$('#checkout button').css({'cursor': 'not-allowed'});
-												}
+												refreshForm(total);
 								}
 				}
 				status_bar = $('#status-bar').clone();
@@ -239,26 +208,19 @@ function refreshCart(id, amount) {
 				} else
 								return false;
 }
-function errorMessage(message) {
-				var sign = document.createElement('span');
-				$(sign).addClass('glyphicon glyphicon-remove-sign pull-left');
-				displayMessage('alert-danger', sign, message);
-}
-function successMessage(message) {
-				var sign = document.createElement('span');
-				$(sign).addClass('glyphicon glyphicon-ok-circle pull-left');
-				displayMessage('alert-success', sign, message);
-}
-function displayMessage(alert_class, sign, message) {
-				$('#status-bar').remove();
-				var feedback = status_bar.clone();
-				$('body').append(feedback);
-				feedback.addClass(alert_class);
-				$(feedback).append(sign);
-				var element = document.createElement('span');
-				element.textContent = message;
-				$(feedback).append(element);
-				feedback.fadeIn(500).delay(3000).fadeOut(300, function () {
-								feedback.remove();
+function refreshForm(total) {
+				$('#total').attr('price', (total));
+				$('#total').text('Total: ' + (total) + ' INR');
+				if ($('.cart-item').length > 0) {
+								$('#checkout button').css({'cursor': 'pointer'});
+				} else {
+								$('#checkout button').css({'cursor': 'not-allowed'});
+				}
+				var form = $('#checkout');
+				$(form).find('input').remove();
+				$('.cart-item').each(function () {
+								var element = document.createElement('input');
+								$(element).attr('type', 'hidden').attr('name', 'unit[]').val(('' + $(this).attr('code') + ',' + $(this).attr('quantity')));
+								$(form).append(element);
 				});
 }
